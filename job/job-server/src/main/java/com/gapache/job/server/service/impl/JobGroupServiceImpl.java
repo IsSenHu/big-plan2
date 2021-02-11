@@ -66,6 +66,7 @@ public class JobGroupServiceImpl implements JobGroupService {
         }
 
         jobGroupRepository.save(jobGroup);
+        jobGroupId = jobGroup.getId();
 
         saveJobs(instances, jobGroup, jobGroupId);
     }
