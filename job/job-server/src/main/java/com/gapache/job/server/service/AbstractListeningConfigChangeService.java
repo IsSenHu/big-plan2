@@ -24,7 +24,8 @@ public abstract class AbstractListeningConfigChangeService implements SmartIniti
     public void afterSingletonsInstantiated() {
         String dataId = dataId();
         try {
-            if (configService.removeConfig(dataId, GROUP) && configService.publishConfig(dataId, GROUP, INIT)) {
+            configService.removeConfig(dataId, GROUP);
+            if (configService.publishConfig(dataId, GROUP, INIT)) {
                 configService.addListener(dataId, GROUP, new AbstractListener() {
                     @Override
                     public void receiveConfigInfo(String configInfo) {

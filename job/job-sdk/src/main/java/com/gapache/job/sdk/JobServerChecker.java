@@ -37,6 +37,7 @@ public class JobServerChecker implements InitializingBean {
     @Scheduled(fixedDelay = 10000, initialDelay = 30000)
     public void check() {
         try {
+            // TODO 分析这里为什么会没有扫描到新的job-server
             List<Instance> instances = namingService.selectInstances("job-server", true);
             for (Instance instance : instances) {
                 if (JobServerRepository.isNew(instance)) {
