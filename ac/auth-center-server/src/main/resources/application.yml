@@ -6,10 +6,10 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.57.9:8848
+        server-addr: 159.75.109.113:8848
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/auth_center?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://159.75.109.113:3306/auth_center?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
     username: root
     password: 521428Slyt!
   jpa:
@@ -21,7 +21,7 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQL57Dialect
   redis:
-    host: 127.0.0.1
+    host: 159.75.109.113
     port: 6379
   thymeleaf:
     prefix: classpath:/templates/
@@ -54,7 +54,7 @@ com:
       update-resources: true
       client-id: husen19950528201314lq19980824
     redisson:
-      address: redis://127.0.0.1:6379
+      address: redis://159.75.109.113:6379
       database: 1
 
 #  设置ribbon客户端超时时间（OpenFeign默认支持ribbon）
