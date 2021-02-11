@@ -20,7 +20,6 @@
         <module>uid-generator</module>
         <module>support-alipay</module>
         <module>support-openfeign</module>
-        <module>../job</module>
     </modules>
 
     <!-- 基于spring-boot 2.2.2.RELEASE -->
