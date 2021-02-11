@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>money-management-common</module>
+        <module>money-management-server</module>
+    </modules>
+    <parent>
+        <artifactId>cloud-base</artifactId>
+        <groupId>com.gapache</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>money-management</artifactId>
+    <name>money-management</name>
+    <packaging>pom</packaging>
+
+    <dependencies>
+
+    </dependencies>
+
+    <build>
+        <finalName>money-management</finalName>
+    </build>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Releases</name>
+            <url>http://118.24.38.46:18081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Snapshot</name>
+            <url>http://118.24.38.46:18081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

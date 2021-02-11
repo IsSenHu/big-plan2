@@ -1,0 +1,50 @@
+02-03 09:12:20.783 ERROR --- [http-nio-10001-exec-7] [WebAutoConfiguration$Advice]:52 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:12:21.032 ERROR --- [http-nio-10001-exec-6] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:12:21.032 ERROR --- [http-nio-10001-exec-6] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:12:48.743 ERROR --- [http-nio-10001-exec-8] [WebAutoConfiguration$Advice]:52 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:12:48.751 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:12:48.752 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:12:51.280 ERROR --- [http-nio-10001-exec-10] [WebAutoConfiguration$Advice]:52 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:12:51.302 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:12:51.303 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:13:35.471 ERROR --- [http-nio-10001-exec-2] [WebAutoConfiguration$Advice]:52 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:17:43.402 ERROR --- [http-nio-10001-exec-5] [WebAutoConfiguration$Advice]:52 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:24:21.492 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:24:21.493 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:24:40.735 ERROR --- [http-nio-10001-exec-3] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:24:40.735 ERROR --- [http-nio-10001-exec-3] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:24:40.746 ERROR --- [http-nio-10001-exec-2] [WebAutoConfiguration$Advice]:49 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:28:44.891 ERROR --- [http-nio-10001-exec-6] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:28:44.892 ERROR --- [http-nio-10001-exec-7] [WebAutoConfiguration$Advice]:49 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:28:44.893 ERROR --- [http-nio-10001-exec-6] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:28:48.620 ERROR --- [http-nio-10001-exec-8] [WebAutoConfiguration$Advice]:49 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:28:48.620 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:28:48.621 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:29:07.362 ERROR --- [http-nio-10001-exec-10] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:29:07.362 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$Advice]:49 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:29:07.363 ERROR --- [http-nio-10001-exec-10] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:30:17.779 ERROR --- [http-nio-10001-exec-4] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:30:17.780 ERROR --- [http-nio-10001-exec-5] [WebAutoConfiguration$Advice]:49 com.gapache.web.WebAutoConfiguration$Advice >>> GET./api/fund/queryOptional发生未知异常:
+com.gapache.security.exception.SecurityException: forbidden
+02-03 09:30:17.780 ERROR --- [http-nio-10001-exec-4] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:37:24.954 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:37:24.955 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:38:25.384 ERROR --- [http-nio-10001-exec-2] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:38:25.388 ERROR --- [http-nio-10001-exec-2] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:39:15.013 ERROR --- [http-nio-10001-exec-4] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:39:16.868 ERROR --- [http-nio-10001-exec-5] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:39:19.839 ERROR --- [http-nio-10001-exec-6] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:39:53.022 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:39:53.024 ERROR --- [http-nio-10001-exec-9] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空
+02-03 09:39:58.015 ERROR --- [http-nio-10001-exec-8] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:41:38.364 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空
+02-03 09:41:38.364 ERROR --- [http-nio-10001-exec-1] [WebAutoConfiguration$AutoValidation]:79 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:code, 错误:不能为空

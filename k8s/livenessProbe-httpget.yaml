@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-httpget-pod
+  namespace: default
+spec:
+  containers:
+    - name: liveness-httpget-container
+      image: nginx
+      imagePullPolicy: IfNotPresent
+      ports:
+        - name: http
+          containerPort: 80
+      livenessProbe:
+        httpGet:
+          port: http
+          path: /index.html
+        initiaDelaySeconds: 1
+        periodSeconds: 3
+        timeoutSeconds: 10
+# 检测探针-存活检测
+# kubectl get pod
+# kubectl describe pod [pod name]
+# kubectl exec [pod name] -it -- /bin/sh

@@ -1,0 +1,316 @@
+01-13 15:25:04.774 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:25:05.548 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:25:05.780 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:25:05.871 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 76ms. Found 3 JPA repository interfaces.
+01-13 15:25:05.949 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:25:06.085 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=a4690814-26f0-3995-899b-d82fa3411e20
+01-13 15:25:06.234 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:25:06.775 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:25:06.789 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:25:06.790 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:25:06.905 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:25:06.905 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 2103 ms
+01-13 15:25:07.447 INFO  --- [main] [AccessCardPersistenceFilter]:61 c.g.security.filter.AccessCardPersistenceFilter >>> init accessCardPersistenceFilter
+01-13 15:25:07.563 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:25:07.673 INFO  --- [main] [Version]:46 org.hibernate.Version >>> HHH000412: Hibernate Core {5.4.9.Final}
+01-13 15:25:07.858 INFO  --- [main] [JavaReflectionManager]:49 org.hibernate.annotations.common.Version >>> HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+01-13 15:25:07.990 INFO  --- [main] [HikariDataSource]:110 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Starting...
+01-13 15:25:08.176 INFO  --- [main] [HikariDataSource]:123 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Start completed.
+01-13 15:25:08.189 INFO  --- [main] [Dialect]:172 org.hibernate.dialect.Dialect >>> HHH000400: Using dialect: org.hibernate.dialect.MySQL57Dialect
+01-13 15:25:09.057 INFO  --- [main] [JtaPlatformInitiator]:52 o.h.e.t.jta.platform.internal.JtaPlatformInitiator >>> HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+01-13 15:25:09.064 INFO  --- [main] [AbstractEntityManagerFactoryBean]:416 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Initialized JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:25:09.610 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:25:09.619 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:25:09.936 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Initializing ExecutorService 'applicationTaskExecutor'
+01-13 15:25:10.240 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:25:10.263 INFO  --- [main] [AuthResourceServerAutoConfiguration$LocalResourceReporterAutoConfiguration]:167 c.g.s.config.AuthResourceServerAutoConfiguration >>> enable register to self[Auth-Center-Server]
+01-13 15:25:10.270 WARN  --- [main] [AbstractApplicationContext]:558 o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext >>> Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'resourceReporter' defined in class path resource [com/gapache/security/config/AuthResourceServerAutoConfiguration$LocalResourceReporterAutoConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.gapache.security.interfaces.ResourceReporter]: Factory method 'resourceReporter' threw exception; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.gapache.security.interfaces.ResourceReceiver' available
+01-13 15:25:10.271 INFO  --- [main] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Shutting down ExecutorService 'applicationTaskExecutor'
+01-13 15:25:10.274 INFO  --- [main] [AbstractEntityManagerFactoryBean]:598 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Closing JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:25:10.277 INFO  --- [main] [HikariDataSource]:350 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown initiated...
+01-13 15:25:10.286 INFO  --- [main] [HikariDataSource]:352 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown completed.
+01-13 15:25:10.289 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Stopping service [Tomcat]
+01-13 15:25:10.290 INFO  --- [main] [AccessCardPersistenceFilter]:66 c.g.security.filter.AccessCardPersistenceFilter >>> destroy accessCardPersistenceFilter
+01-13 15:25:10.292 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [logback-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1088)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.293 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.client.listener] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.LinkedBlockingQueue.poll(LinkedBlockingQueue.java:467)
+ com.alibaba.nacos.client.naming.core.EventDispatcher$Notifier.run(EventDispatcher.java:118)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.294 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.client.naming.updater] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1088)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.294 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.client.naming.updater] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.294 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.failover] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.295 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.push.receiver] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.net.PlainDatagramSocketImpl.receive0(Native Method)
+ java.net.AbstractPlainDatagramSocketImpl.receive(AbstractPlainDatagramSocketImpl.java:143)
+ java.net.DatagramSocket.receive(DatagramSocket.java:812)
+ com.alibaba.nacos.client.naming.core.PushReceiver.run(PushReceiver.java:73)
+ java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+ java.util.concurrent.FutureTask.run(FutureTask.java:266)
+ java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180)
+ java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:25:10.309 INFO  --- [main] [ConditionEvaluationReportLoggingListener]:136 o.s.b.a.l.ConditionEvaluationReportLoggingListener >>> 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+01-13 15:27:50.016 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:27:50.873 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:27:51.127 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:27:51.217 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 79ms. Found 3 JPA repository interfaces.
+01-13 15:27:51.293 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:27:51.412 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=a4690814-26f0-3995-899b-d82fa3411e20
+01-13 15:27:51.551 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:27:52.112 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:27:52.125 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:27:52.126 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:27:52.236 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:27:52.236 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 2195 ms
+01-13 15:27:52.756 INFO  --- [main] [AccessCardPersistenceFilter]:61 c.g.security.filter.AccessCardPersistenceFilter >>> init accessCardPersistenceFilter
+01-13 15:27:52.839 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:27:52.911 INFO  --- [main] [Version]:46 org.hibernate.Version >>> HHH000412: Hibernate Core {5.4.9.Final}
+01-13 15:27:53.114 INFO  --- [main] [JavaReflectionManager]:49 org.hibernate.annotations.common.Version >>> HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+01-13 15:27:53.204 INFO  --- [main] [HikariDataSource]:110 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Starting...
+01-13 15:27:53.351 INFO  --- [main] [HikariDataSource]:123 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Start completed.
+01-13 15:27:53.363 INFO  --- [main] [Dialect]:172 org.hibernate.dialect.Dialect >>> HHH000400: Using dialect: org.hibernate.dialect.MySQL57Dialect
+01-13 15:27:54.043 INFO  --- [main] [JtaPlatformInitiator]:52 o.h.e.t.jta.platform.internal.JtaPlatformInitiator >>> HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+01-13 15:27:54.050 INFO  --- [main] [AbstractEntityManagerFactoryBean]:416 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Initialized JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:27:54.511 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:27:54.521 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:27:54.834 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Initializing ExecutorService 'applicationTaskExecutor'
+01-13 15:27:55.003 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:27:55.027 INFO  --- [main] [AuthResourceServerAutoConfiguration$LocalResourceReporterAutoConfiguration]:167 c.g.s.config.AuthResourceServerAutoConfiguration >>> enable register to self[Auth-Center-Server]
+01-13 15:27:55.036 WARN  --- [main] [AbstractApplicationContext]:558 o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext >>> Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'resourceReporter' defined in class path resource [com/gapache/security/config/AuthResourceServerAutoConfiguration$LocalResourceReporterAutoConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.gapache.security.interfaces.ResourceReporter]: Factory method 'resourceReporter' threw exception; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.gapache.security.interfaces.ResourceReceiver' available
+01-13 15:27:55.036 INFO  --- [main] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Shutting down ExecutorService 'applicationTaskExecutor'
+01-13 15:27:55.039 INFO  --- [main] [AbstractEntityManagerFactoryBean]:598 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Closing JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:27:55.042 INFO  --- [main] [HikariDataSource]:350 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown initiated...
+01-13 15:27:55.177 INFO  --- [main] [HikariDataSource]:352 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown completed.
+01-13 15:27:55.180 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Stopping service [Tomcat]
+01-13 15:27:55.182 INFO  --- [main] [AccessCardPersistenceFilter]:66 c.g.security.filter.AccessCardPersistenceFilter >>> destroy accessCardPersistenceFilter
+01-13 15:27:55.185 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [logback-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1088)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.185 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.client.listener] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.LinkedBlockingQueue.poll(LinkedBlockingQueue.java:467)
+ com.alibaba.nacos.client.naming.core.EventDispatcher$Notifier.run(EventDispatcher.java:118)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.186 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.client.naming.updater] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1088)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.186 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.client.naming.updater] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.187 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.failover] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.187 WARN  --- [main] [DirectJDKLog]:173 org.apache.catalina.loader.WebappClassLoaderBase >>> The web application [ROOT] appears to have started a thread named [com.alibaba.nacos.naming.push.receiver] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.net.PlainDatagramSocketImpl.receive0(Native Method)
+ java.net.AbstractPlainDatagramSocketImpl.receive(AbstractPlainDatagramSocketImpl.java:143)
+ java.net.DatagramSocket.receive(DatagramSocket.java:812)
+ com.alibaba.nacos.client.naming.core.PushReceiver.run(PushReceiver.java:73)
+ java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+ java.util.concurrent.FutureTask.run(FutureTask.java:266)
+ java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180)
+ java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+01-13 15:27:55.201 INFO  --- [main] [ConditionEvaluationReportLoggingListener]:136 o.s.b.a.l.ConditionEvaluationReportLoggingListener >>> 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+01-13 15:29:40.154 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:29:40.868 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:29:41.060 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:29:41.140 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 72ms. Found 3 JPA repository interfaces.
+01-13 15:29:41.202 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:29:41.301 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=021aab20-5674-34dc-9bbe-6d6daf9cad81
+01-13 15:29:41.404 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:29:41.839 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:29:41.849 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:29:41.849 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:29:41.947 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:29:41.947 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 1773 ms
+01-13 15:29:42.443 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:29:42.510 INFO  --- [main] [Version]:46 org.hibernate.Version >>> HHH000412: Hibernate Core {5.4.9.Final}
+01-13 15:29:42.637 INFO  --- [main] [JavaReflectionManager]:49 org.hibernate.annotations.common.Version >>> HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+01-13 15:29:42.762 INFO  --- [main] [HikariDataSource]:110 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Starting...
+01-13 15:29:42.872 INFO  --- [main] [HikariDataSource]:123 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Start completed.
+01-13 15:29:42.882 INFO  --- [main] [Dialect]:172 org.hibernate.dialect.Dialect >>> HHH000400: Using dialect: org.hibernate.dialect.MySQL57Dialect
+01-13 15:29:43.476 INFO  --- [main] [JtaPlatformInitiator]:52 o.h.e.t.jta.platform.internal.JtaPlatformInitiator >>> HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+01-13 15:29:43.482 INFO  --- [main] [AbstractEntityManagerFactoryBean]:416 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Initialized JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:29:43.852 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:29:43.858 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:29:44.123 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Initializing ExecutorService 'applicationTaskExecutor'
+01-13 15:29:44.290 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:29:44.690 INFO  --- [main] [EndpointLinksResolver]:58 o.s.b.actuate.endpoint.web.EndpointLinksResolver >>> Exposing 2 endpoint(s) beneath base path '/actuator'
+01-13 15:29:44.810 INFO  --- [main] [TomcatWebServer]:204 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat started on port(s): 10001 (http) with context path ''
+01-13 15:29:45.273 INFO  --- [main] [NacosServiceRegistry]:65 c.a.cloud.nacos.registry.NacosServiceRegistry >>> nacos registry, DEFAULT_GROUP money-management-server 192.168.101.65:10001 register finished
+01-13 15:29:45.278 INFO  --- [main] [StartupInfoLogger]:61 c.g.c.m.management.server.MoneyManagementServer >>> Started MoneyManagementServer in 6.237 seconds (JVM running for 7.067)
+01-13 15:29:45.743 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring DispatcherServlet 'dispatcherServlet'
+01-13 15:29:45.744 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:525 org.springframework.web.servlet.DispatcherServlet >>> Initializing Servlet 'dispatcherServlet'
+01-13 15:29:45.759 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:547 org.springframework.web.servlet.DispatcherServlet >>> Completed initialization in 15 ms
+01-13 15:47:32.372 INFO  --- [SpringContextShutdownHook] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Shutting down ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:47:32.390 INFO  --- [SpringContextShutdownHook] [NacosServiceRegistry]:80 c.a.cloud.nacos.registry.NacosServiceRegistry >>> De-registering from Nacos Server now...
+01-13 15:47:32.404 INFO  --- [SpringContextShutdownHook] [NacosServiceRegistry]:100 c.a.cloud.nacos.registry.NacosServiceRegistry >>> De-registration finished.
+01-13 15:47:32.406 INFO  --- [SpringContextShutdownHook] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Shutting down ExecutorService 'applicationTaskExecutor'
+01-13 15:47:32.425 INFO  --- [SpringContextShutdownHook] [AbstractEntityManagerFactoryBean]:598 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Closing JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:47:32.453 INFO  --- [SpringContextShutdownHook] [HikariDataSource]:350 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown initiated...
+01-13 15:47:32.485 INFO  --- [SpringContextShutdownHook] [HikariDataSource]:352 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown completed.
+01-13 15:47:40.222 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:47:40.935 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:47:41.208 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:47:41.278 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 62ms. Found 3 JPA repository interfaces.
+01-13 15:47:41.338 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:47:41.441 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=021aab20-5674-34dc-9bbe-6d6daf9cad81
+01-13 15:47:41.557 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:47:41.988 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:47:41.997 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:47:41.997 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:47:42.083 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:47:42.084 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 1839 ms
+01-13 15:47:42.625 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:47:42.699 INFO  --- [main] [Version]:46 org.hibernate.Version >>> HHH000412: Hibernate Core {5.4.9.Final}
+01-13 15:47:42.829 INFO  --- [main] [JavaReflectionManager]:49 org.hibernate.annotations.common.Version >>> HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+01-13 15:47:42.982 INFO  --- [main] [HikariDataSource]:110 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Starting...
+01-13 15:47:43.108 INFO  --- [main] [HikariDataSource]:123 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Start completed.
+01-13 15:47:43.121 INFO  --- [main] [Dialect]:172 org.hibernate.dialect.Dialect >>> HHH000400: Using dialect: org.hibernate.dialect.MySQL57Dialect
+01-13 15:47:43.768 INFO  --- [main] [JtaPlatformInitiator]:52 o.h.e.t.jta.platform.internal.JtaPlatformInitiator >>> HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+01-13 15:47:43.774 INFO  --- [main] [AbstractEntityManagerFactoryBean]:416 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Initialized JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:47:44.147 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:47:44.153 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:47:44.421 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Initializing ExecutorService 'applicationTaskExecutor'
+01-13 15:47:44.580 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:47:44.993 INFO  --- [main] [EndpointLinksResolver]:58 o.s.b.actuate.endpoint.web.EndpointLinksResolver >>> Exposing 2 endpoint(s) beneath base path '/actuator'
+01-13 15:47:45.103 INFO  --- [main] [TomcatWebServer]:204 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat started on port(s): 10001 (http) with context path ''
+01-13 15:47:45.240 INFO  --- [main] [NacosServiceRegistry]:65 c.a.cloud.nacos.registry.NacosServiceRegistry >>> nacos registry, DEFAULT_GROUP money-management-server 192.168.101.65:10001 register finished
+01-13 15:47:45.245 INFO  --- [main] [StartupInfoLogger]:61 c.g.c.m.management.server.MoneyManagementServer >>> Started MoneyManagementServer in 6.191 seconds (JVM running for 7.297)
+01-13 15:47:45.733 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring DispatcherServlet 'dispatcherServlet'
+01-13 15:47:45.733 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:525 org.springframework.web.servlet.DispatcherServlet >>> Initializing Servlet 'dispatcherServlet'
+01-13 15:47:45.744 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:547 org.springframework.web.servlet.DispatcherServlet >>> Completed initialization in 10 ms
+01-13 15:49:48.930 INFO  --- [SpringContextShutdownHook] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Shutting down ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:49:48.934 INFO  --- [SpringContextShutdownHook] [NacosServiceRegistry]:80 c.a.cloud.nacos.registry.NacosServiceRegistry >>> De-registering from Nacos Server now...
+01-13 15:49:48.940 INFO  --- [SpringContextShutdownHook] [NacosServiceRegistry]:100 c.a.cloud.nacos.registry.NacosServiceRegistry >>> De-registration finished.
+01-13 15:49:48.941 INFO  --- [SpringContextShutdownHook] [ExecutorConfigurationSupport]:208 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Shutting down ExecutorService 'applicationTaskExecutor'
+01-13 15:49:48.944 INFO  --- [SpringContextShutdownHook] [AbstractEntityManagerFactoryBean]:598 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Closing JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:49:48.949 INFO  --- [SpringContextShutdownHook] [HikariDataSource]:350 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown initiated...
+01-13 15:49:48.958 INFO  --- [SpringContextShutdownHook] [HikariDataSource]:352 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Shutdown completed.
+01-13 15:49:59.160 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:50:00.277 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:50:00.580 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:50:00.697 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 104ms. Found 3 JPA repository interfaces.
+01-13 15:50:00.794 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:50:00.946 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=021aab20-5674-34dc-9bbe-6d6daf9cad81
+01-13 15:50:01.440 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:50:02.201 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:50:02.219 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:50:02.220 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:50:02.444 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:50:02.445 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 3266 ms
+01-13 15:50:03.303 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:50:09.928 INFO  --- [main] [SpringApplication]:655 c.g.c.m.management.server.MoneyManagementServer >>> The following profiles are active: local
+01-13 15:50:10.714 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'nacos-discovery' contains invalid characters, please migrate to a valid format.
+01-13 15:50:10.970 INFO  --- [main] [RepositoryConfigurationDelegate]:127 o.s.d.r.config.RepositoryConfigurationDelegate >>> Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+01-13 15:50:11.054 INFO  --- [main] [RepositoryConfigurationDelegate]:187 o.s.d.r.config.RepositoryConfigurationDelegate >>> Finished Spring Data repository scanning in 77ms. Found 3 JPA repository interfaces.
+01-13 15:50:11.129 WARN  --- [main] [EndpointId]:155 o.springframework.boot.actuate.endpoint.EndpointId >>> Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+01-13 15:50:11.249 INFO  --- [main] [GenericScope]:295 o.springframework.cloud.context.scope.GenericScope >>> BeanFactory id=021aab20-5674-34dc-9bbe-6d6daf9cad81
+01-13 15:50:11.378 INFO  --- [main] [PostProcessorRegistrationDelegate$BeanPostProcessorChecker]:330 o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker >>> Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+01-13 15:50:11.822 INFO  --- [main] [TomcatWebServer]:92 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat initialized with port(s): 10001 (http)
+01-13 15:50:11.831 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardService >>> Starting service [Tomcat]
+01-13 15:50:11.832 INFO  --- [main] [DirectJDKLog]:173 org.apache.catalina.core.StandardEngine >>> Starting Servlet engine: [Apache Tomcat/9.0.29]
+01-13 15:50:11.917 INFO  --- [main] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring embedded WebApplicationContext
+01-13 15:50:11.918 INFO  --- [main] [ServletWebServerApplicationContext]:284 org.springframework.web.context.ContextLoader >>> Root WebApplicationContext: initialization completed in 1970 ms
+01-13 15:50:12.554 INFO  --- [main] [LogHelper]:31 org.hibernate.jpa.internal.util.LogHelper >>> HHH000204: Processing PersistenceUnitInfo [name: default]
+01-13 15:50:12.616 INFO  --- [main] [Version]:46 org.hibernate.Version >>> HHH000412: Hibernate Core {5.4.9.Final}
+01-13 15:50:12.766 INFO  --- [main] [JavaReflectionManager]:49 org.hibernate.annotations.common.Version >>> HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+01-13 15:50:12.894 INFO  --- [main] [HikariDataSource]:110 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Starting...
+01-13 15:50:13.011 INFO  --- [main] [HikariDataSource]:123 com.zaxxer.hikari.HikariDataSource >>> HikariPool-1 - Start completed.
+01-13 15:50:13.021 INFO  --- [main] [Dialect]:172 org.hibernate.dialect.Dialect >>> HHH000400: Using dialect: org.hibernate.dialect.MySQL57Dialect
+01-13 15:50:13.610 INFO  --- [main] [JtaPlatformInitiator]:52 o.h.e.t.jta.platform.internal.JtaPlatformInitiator >>> HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+01-13 15:50:13.616 INFO  --- [main] [AbstractEntityManagerFactoryBean]:416 o.s.orm.jpa.LocalContainerEntityManagerFactoryBean >>> Initialized JPA EntityManagerFactory for persistence unit 'default'
+01-13 15:50:14.041 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:50:14.047 INFO  --- [main] [URLConfigurationSource]:126 com.netflix.config.sources.URLConfigurationSource >>> URLs to be used as dynamic configuration source: [file:/Users/husen/develop/codes/mine/big-plan/money-management/money-management-server/target/classes/config.properties]
+01-13 15:50:14.297 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskExecutor >>> Initializing ExecutorService 'applicationTaskExecutor'
+01-13 15:50:14.470 INFO  --- [main] [ExecutorConfigurationSupport]:171 o.s.scheduling.concurrent.ThreadPoolTaskScheduler >>> Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+01-13 15:50:14.848 INFO  --- [main] [EndpointLinksResolver]:58 o.s.b.actuate.endpoint.web.EndpointLinksResolver >>> Exposing 2 endpoint(s) beneath base path '/actuator'
+01-13 15:50:14.959 INFO  --- [main] [TomcatWebServer]:204 o.s.boot.web.embedded.tomcat.TomcatWebServer >>> Tomcat started on port(s): 10001 (http) with context path ''
+01-13 15:50:15.096 INFO  --- [main] [NacosServiceRegistry]:65 c.a.cloud.nacos.registry.NacosServiceRegistry >>> nacos registry, DEFAULT_GROUP money-management-server 192.168.101.65:10001 register finished
+01-13 15:50:15.199 INFO  --- [main] [StartupInfoLogger]:61 c.g.c.m.management.server.MoneyManagementServer >>> Started MoneyManagementServer in 6.468 seconds (JVM running for 7.541)
+01-13 15:50:15.434 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [DirectJDKLog]:173 o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] >>> Initializing Spring DispatcherServlet 'dispatcherServlet'
+01-13 15:50:15.434 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:525 org.springframework.web.servlet.DispatcherServlet >>> Initializing Servlet 'dispatcherServlet'
+01-13 15:50:15.449 INFO  --- [RMI TCP Connection(2)-127.0.0.1] [FrameworkServlet]:547 org.springframework.web.servlet.DispatcherServlet >>> Completed initialization in 12 ms
+01-13 16:15:25.404 WARN  --- [HikariPool-1 housekeeper] [HikariPool$HouseKeeper]:787 com.zaxxer.hikari.pool.HikariPool >>> HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=5m11s977ms).
+01-13 16:18:29.403 WARN  --- [HikariPool-1 housekeeper] [HikariPool$HouseKeeper]:787 com.zaxxer.hikari.pool.HikariPool >>> HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m4s128ms).

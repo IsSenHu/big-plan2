@@ -1,0 +1,3 @@
+FROM javaapp
+MAINTAINER husen <1178515826@qq.com>
+EXPOSE $EXPOSE

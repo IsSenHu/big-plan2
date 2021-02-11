@@ -1,0 +1,188 @@
+version: "3.8"
+services:
+#  服务的名称
+  gateway:
+    build:
+#      Dockerfile的所在的目录路径
+      context: /data/gateway
+#      传到Dockerfile的参数
+      args:
+        EXPOSE: 9999
+#    开启交互模式 可以让我们进入容器
+    stdin_open: true
+    tty: true
+#    暴露端口信息
+    ports:
+      - 9999:9999
+#    卷挂载路径设置
+    volumes:
+#      挂载项目日志
+      - /export/logs/gateway:/export/logs/gateway
+#      挂载项目jar包，我们只需要更新宿主机的对应目录中的jar包再重启容器就可以完成代码的更新了
+      - /data/gateway:/data/app
+#    依赖于哪些服务，被依赖的服务会优先启动，但在这里只是容器先启动，并不是真正的服务已经启动好了，
+#    这里需要借助wait-for.sh来达到依赖的服务先启动好再启动本服务的效果
+    depends_on:
+      - db
+      - redis
+      - auth-center-server
+#   覆盖容器启动后默认执行的命令
+    command:
+#      执行bash命令
+#      1、进入jar包所在的目录
+#      2、给wait-for.sh和jar包的权限，防止没有权限的错误
+#      3、使用wait-for.sh检查并等待依赖服务是否已经启动好了
+#      4、所依赖的服务已经启动好了，启动本服务
+#      5、$JAVA_OPTS $PARAMS配置在.env文件里
+      /bin/bash -c "cd /data/app
+      && chmod +x ./wait-for.sh
+      && chmod +x ./gateway.jar
+      && ./wait-for.sh db:3306
+      && ./wait-for.sh redis:6379
+      && ./wait-for.sh auth-center-server:10000
+      && java -jar $JAVA_OPTS ./gateway.jar $PARAMS"
+  auth-center-server:
+    build:
+      context: /data/auth-center-server
+      args:
+        EXPOSE: 10000
+    stdin_open: true
+    tty: true
+    ports:
+      - 10000:10000
+    volumes:
+      - /export/logs/auth-center-server:/export/logs/auth-center-server
+      - /data/auth-center-server:/data/app
+    depends_on:
+      - db
+      - redis
+    command:
+      /bin/bash -c "cd /data/app
+      && chmod +x ./wait-for.sh
+      && chmod +x ./auth-center-server.jar
+      && ./wait-for.sh db:3306
+      && ./wait-for.sh redis:6379
+      && java -jar $JAVA_OPTS ./auth-center-server.jar $PARAMS"
+  money-management-server:
+    build:
+      context: /data/money-management-server
+      args:
+        EXPOSE: 10001
+    stdin_open: true
+    tty: true
+    ports:
+      - 10001:10001
+    volumes:
+      - /export/logs/money-management-server:/export/logs/money-management-server
+      - /data/money-management-server:/data/app
+    depends_on:
+      - db
+      - redis
+      - auth-center-server
+    command:
+      /bin/bash -c "cd /data/app
+      && chmod +x ./wait-for.sh
+      && chmod +x ./money-management-server.jar
+      && ./wait-for.sh db:3306
+      && ./wait-for.sh redis:6379
+      && ./wait-for.sh auth-center-server:10000
+      && java -jar $JAVA_OPTS ./money-management-server.jar $PARAMS"
+  blog-admin:
+    build:
+      context: /data/blog-admin
+      args:
+        EXPOSE: 10002
+    stdin_open: true
+    tty: true
+    ports:
+      - 10002:10002
+    volumes:
+      - /export/logs/blog-admin:/export/logs/blog-admin
+      - /data/blog-admin:/data/app
+    command:
+      /bin/bash -c "cd /data/app
+      && chmod +x ./wait-for.sh
+      && chmod +x ./blog-admin.jar
+      && ./wait-for.sh auth-center-server:10000
+      && java -jar $JAVA_OPTS ./blog-admin.jar $PARAMS"
+    depends_on:
+      - auth-center-server
+  blog-server:
+    build:
+      context: /data/blog-server
+      args:
+        EXPOSE: 10003
+    stdin_open: true
+    tty: true
+    ports:
+      - 10003:10003
+    volumes:
+      - /export/logs/blog-server:/export/logs/blog-server
+      - /data/blog-server:/data/app
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+      - auth-center-server
+    command:
+      /bin/bash -c "cd /data/app
+      && chmod +x ./wait-for.sh
+      && chmod +x ./blog-server.jar
+      && ./wait-for.sh db:3306
+      && ./wait-for.sh redis:6379
+      && ./wait-for.sh auth-center-server:10000
+      && ./wait-for.sh elasticsearch:9200
+      && java -jar $JAVA_OPTS ./blog-server.jar $PARAMS"
+  redis:
+    image: redis:5.0.10
+#    容器的工作目录
+    working_dir: /data
+    ports:
+      - 6379:6379
+    volumes:
+      - /data/redis6379/dump.rdb:/data/dump.rdb
+      - /data/redis6379/redis.conf:/data/redis/redis-conf/redis.conf
+      - /data/redis6379/logs:/data/redis/redis-log
+      - /data/redis6379/run:/var/run
+    command:
+#      cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
+#      修改容器所在时区
+      /bin/bash -c "ls /data
+      && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
+      && ls /data/redis/redis-conf
+      && ls /data/redis/redis-log
+      && chmod 777 -R /data
+      && redis-server /data/redis/redis-conf/redis.conf"
+  db:
+    image: mysql
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - 3306:3306
+    volumes:
+      - /data/mysql/conf:/etc/mysql/conf.d
+      - /data/mysql/logs:/var/log/mysql
+      - /data/mysql/data:/var/lib/mysql
+#    设置环境变量
+    environment:
+#      设置容器所在的时区
+      - TZ=Asia/Shanghai
+      - default-time_zone='+8:00'
+      - MYSQL_ROOT_PASSWORD=521428Slyt!
+      - character-set-server=utf8mb4
+      - collation-server=utf8mb4_unicode_ci
+      - default-authentication-plugin=mysql_native_password
+  elasticsearch:
+    image: elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data
+#      让容器所在的时区与宿主机同步
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+volumes:
+  logvolume01: { }

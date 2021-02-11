@@ -1,0 +1,29 @@
+server:
+  port: 8009
+spring:
+  application:
+    name: cloud-provider-hystrix-payment
+  cloud:
+    config:
+      label: master
+      name: payment-hystrix
+      profile: dev
+      uri: http://localhost:3344
+  rabbitmq:
+    host: 118.24.38.46
+    port: 5672
+    username: husen
+    password: 521428
+    virtual-host: /
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka7001:7001/eureka/,http://eureka7002:7002/eureka/
+#      暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

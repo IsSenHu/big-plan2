@@ -1,0 +1,2 @@
+01-30 21:09:57.102 ERROR --- [main] [SqlExceptionHelper]:142 org.hibernate.engine.jdbc.spi.SqlExceptionHelper >>> You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHEN TR.id = 1' at line 6
+01-30 21:10:44.752 ERROR --- [main] [SqlExceptionHelper]:142 org.hibernate.engine.jdbc.spi.SqlExceptionHelper >>> Table 'auth_center.TB_RESOURCE' doesn't exist

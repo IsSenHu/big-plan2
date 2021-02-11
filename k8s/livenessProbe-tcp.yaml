@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-tcp-pod
+  namespace: default
+spec:
+  containers:
+    - name: liveness-tcp-container
+      image: nginx
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        initiaDelaySeconds: 5
+        timeoutSeconds: 1
+        tcpSocket:
+          port: 80
+# 检测探针-存活检测
+# kubectl get pod
+# kubectl describe pod [pod name]
+# kubectl exec [pod name] -it -- /bin/sh

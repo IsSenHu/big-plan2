@@ -1,0 +1,1 @@
+01-27 09:37:52.865 ERROR --- [http-nio-10001-exec-2] [WebAutoConfiguration$AutoValidation]:82 c.gapache.web.WebAutoConfiguration$AutoValidation >>> 参数:netWorthType, 错误:不能为空

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>cloud-provider-payment</module>
+        <module>cloud-consumer-order</module>
+        <module>cloud-sdk</module>
+        <module>cloud-eureka-server</module>
+        <module>cloud-provider-payment-zk</module>
+        <module>cloud-consumer-order-zk</module>
+        <module>cloud-provider-payment-consul</module>
+        <module>cloud-consumer-order-consul</module>
+        <module>cloud-consumer-order-feign</module>
+        <module>cloud-provider-hystrix-payment</module>
+        <module>cloud-hystrix-dashboard</module>
+        <module>cloud-gateway</module>
+        <module>cloud-config-center</module>
+        <module>cloud-stream-rabbitmq-provider</module>
+        <module>cloud-stream-rabbitmq-consumer</module>
+        <module>cloud-alibaba-provider-payment</module>
+        <module>cloud-alibaba-consumer-order</module>
+        <module>seata-order-service</module>
+        <module>seata-storage-service</module>
+        <module>seata-account-service</module>
+        <module>seata-business-service</module>
+    </modules>
+    <parent>
+        <artifactId>base</artifactId>
+        <groupId>com.gapache</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>cloud</artifactId>
+    <name>cloud</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <finalName>cloud</finalName>
+    </build>
+</project>

@@ -1,0 +1,36 @@
+server:
+  port: 9973
+spring:
+  application:
+    name: job-server
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.57.9:8848
+        metadata:
+          server:
+            port: ${com.gapache.job.server.port}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/job_server?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    username: root
+    password: 521428Slyt!
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    show-sql: true
+    open-in-view: false
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+  redis:
+    host: 127.0.0.1
+    port: 6379
+com:
+  gapache:
+    redisson:
+      address: redis://127.0.0.1:6379
+      database: 1
+    job:
+      server:
+        port: 9927
