@@ -6,13 +6,13 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.57.9:8848
+        server-addr: 159.75.109.113:8848
         metadata:
           server:
             port: ${com.gapache.job.server.port}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/job_server?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://159.75.109.113:3306/job_server?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
     username: root
     password: 521428Slyt!
   jpa:
@@ -24,7 +24,7 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQL57Dialect
   redis:
-    host: 127.0.0.1
+    host: 159.75.109.113
     port: 6379
   mail:
     username: 1178515826@qq.com
@@ -38,7 +38,7 @@ spring:
 com:
   gapache:
     redisson:
-      address: redis://127.0.0.1:6379
+      address: redis://159.75.109.113:6379
       database: 1
     job:
       server:
