@@ -6,6 +6,7 @@ import com.gapache.security.exception.SecurityException;
 import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.model.AccessCard;
 import com.gapache.security.model.SecurityError;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  * @author HuSen
  * @since 2020/8/10 9:08 上午
  */
+@Slf4j
 @Aspect
 @Component
 public class PreAuthResourceAspect {
@@ -22,10 +24,12 @@ public class PreAuthResourceAspect {
     public void before(AuthResource authResource) {
         AccessCard accessCard = AccessCardHolder.getContext();
         if (accessCard == null) {
+            log.warn("accessCard is null");
             throw new SecurityException(SecurityError.FORBIDDEN);
         }
         // 校验权限
         String fullScope = AuthResourceCache.checkFullScope(authResource);
+        log.info("full scope:{}", fullScope);
         if (!accessCard.getAuthorities().contains(fullScope)) {
             throw new SecurityException(SecurityError.FORBIDDEN);
         }
