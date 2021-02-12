@@ -82,17 +82,15 @@ public class ServerMessageHandler extends SimpleChannelInboundHandler<ServerMess
         }
 
         public static TaskExecutor take(String name) {
-            LinkedBlockingQueue<TaskExecutor> executorQueue = QUEUE_MAP.get(name);
-            if (executorQueue == null || executorQueue.isEmpty()) {
+            try {
+                LinkedBlockingQueue<TaskExecutor> executorQueue = QUEUE_MAP.get(name);
+                if (executorQueue == null) {
+                    return null;
+                }
+                return executorQueue.take();
+            } catch (Exception e) {
+                e.printStackTrace();
                 return null;
-            }
-            return executorQueue.peek();
-        }
-
-        public static void poll(String name) {
-            LinkedBlockingQueue<TaskExecutor> executorQueue = QUEUE_MAP.get(name);
-            if (executorQueue != null) {
-                executorQueue.poll();
             }
         }
 
@@ -133,7 +131,6 @@ public class ServerMessageHandler extends SimpleChannelInboundHandler<ServerMess
                 taskResult.setRemark(clientMessage.getError());
 
                 clientMessage.setData(ProtocstuffUtils.bean2Byte(taskInfo, TaskInfo.class));
-                TaskPuller.poll(taskInfo.getName());
                 channelHandlerContext.writeAndFlush(clientMessage);
                 return;
             }
@@ -156,7 +153,6 @@ public class ServerMessageHandler extends SimpleChannelInboundHandler<ServerMess
             clientMessage.setCode(0);
             clientMessage.setType(ClientMessage.Type.RESULT.getType());
             clientMessage.setData(ProtocstuffUtils.bean2Byte(taskResult, TaskResult.class));
-            TaskPuller.poll(taskInfo.getName());
             channelHandlerContext.writeAndFlush(clientMessage);
         }
     }
