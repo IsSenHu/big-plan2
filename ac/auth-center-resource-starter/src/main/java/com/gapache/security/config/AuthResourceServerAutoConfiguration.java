@@ -102,6 +102,7 @@ public class AuthResourceServerAutoConfiguration implements InitializingBean {
                     if (repeatChecker.contains(category + authResource.scope())) {
                         throw new RuntimeException("duplicate scope:" + authResource.scope());
                     }
+                    log.info("find auth resource:{}", authResource);
                     AuthResourceCache.put(resourceServerName, category, authResource);
                     repeatChecker.add(category + authResource.scope());
                 }
