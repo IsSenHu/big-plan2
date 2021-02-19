@@ -25,6 +25,7 @@ com:
     security:
       register-remote: true
       update-resources: true
+      client-id: money123456money
     job:
       executor:
         name: 金钱管理
