@@ -24,7 +24,7 @@ com:
   gapache:
     security:
       register-remote: true
-      update-resources: false
+      update-resources: true
     job:
       executor:
         name: 金钱管理
