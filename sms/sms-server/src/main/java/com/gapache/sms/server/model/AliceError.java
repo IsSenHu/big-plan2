@@ -7,7 +7,7 @@ import com.gapache.commons.model.Error;
  * create on 2020/1/14 11:59
  */
 public enum AliceError implements Error {
-
+    //
     REQUEST_EXCEPTION(20001, "调用短信API发生异常"),
     REQUEST_FAIL(20002, "调用短信API失败"),
     SIGN_NOT_EXISTED(20003, "签名不存在"),
@@ -16,8 +16,8 @@ public enum AliceError implements Error {
     CODE_ALWAYS_SINGLE(20006, "验证码总是单独发送"),
     SEND_FREQUENTLY(20007, "短信发送频繁");
 
-    private Integer code;
-    private String error;
+    private final Integer code;
+    private final String error;
 
     AliceError(Integer code, String error) {
         this.code = code;

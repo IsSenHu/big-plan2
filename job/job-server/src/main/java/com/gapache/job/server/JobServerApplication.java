@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
  * 数据加密：调度中心和执行器之间的通讯进行数据加密，提升调度信息安全性；
  * 上报NACOS的数据加解密
  * TODO Restful Api开发
+ * TODO 注册为Service的方式可能不是很合理
  *
  * 这个时候只要JobServer至少有一台存活，一样可以调度任务过来，不影响任务的调度。
  *

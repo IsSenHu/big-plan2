@@ -10,7 +10,7 @@ public enum AliceLuaScript implements LuaScript {
     //
     SEND_SMS("lua/sendSms.lua");
 
-    private String path;
+    private final String path;
 
     AliceLuaScript(String path) {
         this.path = path;

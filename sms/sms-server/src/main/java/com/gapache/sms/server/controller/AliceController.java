@@ -27,6 +27,11 @@ public class AliceController {
         return aliceService.sendSms(vo);
     }
 
+    @PostMapping("/queryVerifyCode")
+    public JsonResult<String> queryVerifyCode() {
+        return null;
+    }
+
     @PostMapping("/sendBatchSms")
     public JsonResult<String> sendBatchSms(@RequestBody SendBatchSmsVO vo) {
         return aliceService.sendBatchSms(vo);
