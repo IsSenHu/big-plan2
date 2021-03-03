@@ -3,20 +3,20 @@ package com.gapache.blog.server.dao.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * @author HuSen
  * @since 2020/8/27 7:30 下午
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "tb_review")
-public class ReviewEntity extends BaseEntity<Long> {
+public class ReviewEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     /**
      * 需要预留一些专用的ID
      *

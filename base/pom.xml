@@ -20,6 +20,8 @@
         <module>uid-generator</module>
         <module>support-alipay</module>
         <module>support-openfeign</module>
+        <module>support-vertx-web</module>
+        <module>support-cloud-zeus-discovery</module>
     </modules>
 
     <!-- 基于spring-boot 2.2.2.RELEASE -->
@@ -200,6 +202,24 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${boot.mybatis.version}</version>
+            </dependency>
+            <!-- 指定vert.x版本 -->
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-core</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-web</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-hazelcast</artifactId>
+                <version>4.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

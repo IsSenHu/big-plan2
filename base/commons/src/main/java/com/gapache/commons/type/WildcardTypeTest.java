@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class WildcardTypeTest {
 
-    private List<? extends String> a;
+    private List<String> a;
 
     public static void main(String[] args) throws Exception {
         Field a = WildcardTypeTest.class.getDeclaredField("a");
@@ -30,6 +30,7 @@ public class WildcardTypeTest {
             Type[] typesString = aParameterizedType.getActualTypeArguments();
             System.out.println("a 域泛型参数[0]的type名：" + typesString[0].getTypeName());
             System.out.println("a 域泛型参数[0]的type类型名：" + typesString[0].getClass().getCanonicalName());
+            System.out.println(typesString[0].getClass());
             WildcardType type0 = (WildcardType) typesString[0];
             Type[] type0UpperBounds = type0.getUpperBounds();
             Type[] type0LowerBounds = type0.getLowerBounds();

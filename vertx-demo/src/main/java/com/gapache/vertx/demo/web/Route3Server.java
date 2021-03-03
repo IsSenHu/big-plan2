@@ -1,6 +1,5 @@
 package com.gapache.vertx.demo.web;
 
-import com.gapache.vertx.demo.MyPoJo;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
