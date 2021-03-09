@@ -5,8 +5,11 @@ import com.gapache.vertx.web.annotation.GetRouting;
 import com.gapache.vertx.web.annotation.PostRouting;
 import com.gapache.vertx.web.annotation.RequestRouting;
 import com.gapache.vertx.web.annotation.VertxController;
+import com.gapache.vertx.web.core.VertxManager;
 import com.gapache.vertx.web.test.client.Test2Client;
 import com.gapache.vertx.web.test.client.Test4Client;
+import com.gapache.vertx.web.test.pojo.TestPoJo;
+import io.vertx.core.shareddata.SharedData;
 
 import javax.annotation.Resource;
 
@@ -22,7 +25,7 @@ public class TestController {
     private Test2Client test2Client;
 
     @Resource
-    private Test4Client test3Client;
+    private Test4Client test4Client;
 
     @GetRouting
     public JsonResult<String> test() {
@@ -34,7 +37,10 @@ public class TestController {
             }
         });
 
-        test3Client.hello("胡森").onComplete(event -> {
+        TestPoJo testPoJo = new TestPoJo();
+        testPoJo.setServiceName("test");
+
+        test4Client.dynamic(testPoJo).onComplete(event -> {
             if (event.succeeded()) {
                 System.out.println(event.result());
             } else {
@@ -48,5 +54,36 @@ public class TestController {
     public JsonResult<String> test2(String name, Integer age) {
         System.out.println(name + ": " + age);
         return JsonResult.of(name + ": " + age);
+    }
+
+    @GetRouting("/test3")
+    public JsonResult<String> test3() {
+        VertxManager.getVertx().eventBus().publish("vertx.health.check.address", System.currentTimeMillis() + "");
+        SharedData sharedData = VertxManager.getVertx().sharedData();
+        sharedData.<String, String>getAsyncMap("myMap", res -> {
+            if (res.succeeded()) {
+                res.result().put("name", "胡森", putRes -> {
+                    if (putRes.succeeded()) {
+                        System.out.println("数据放入成功");
+                    }
+                });
+            }
+        });
+        return JsonResult.success();
+    }
+
+    @GetRouting("/test4")
+    public JsonResult<String> test4() {
+        SharedData sharedData = VertxManager.getVertx().sharedData();
+        sharedData.<String, String>getAsyncMap("myMap", res -> {
+            if (res.succeeded()) {
+                res.result().get("name", getRes -> {
+                    if (getRes.succeeded()) {
+                        System.out.println("获取到名称: " + getRes.result());
+                    }
+                });
+            }
+        });
+        return JsonResult.success();
     }
 }

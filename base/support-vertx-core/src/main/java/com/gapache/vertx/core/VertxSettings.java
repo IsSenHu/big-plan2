@@ -1,4 +1,4 @@
-package com.gapache.vertx.web.core;
+package com.gapache.vertx.core;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,6 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "com.gapache.vertx.settings")
 public class VertxSettings {
+
+    private boolean cluster;
 
     @Data
     @ConfigurationProperties(prefix = "com.gapache.vertx.web.settings")

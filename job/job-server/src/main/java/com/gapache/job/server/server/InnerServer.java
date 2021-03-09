@@ -5,7 +5,7 @@ import com.gapache.commons.utils.IStringUtils;
 import com.gapache.job.common.EncryptAndDecryptMessageHandler;
 import com.gapache.job.common.model.Constants;
 import com.gapache.job.common.utils.OsUtils;
-import com.gapache.job.sdk.config.InnerServerProperties;
+import com.gapache.job.server.server.config.InnerServerProperties;
 import com.gapache.job.common.thread.JobThreadBuilder;
 import com.gapache.job.server.discovery.ExecutorDiscovery;
 import io.netty.bootstrap.ServerBootstrap;
@@ -21,7 +21,6 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
@@ -37,7 +36,6 @@ import java.util.concurrent.TimeUnit;
  * @since 2021/2/3 5:55 下午
  */
 @Slf4j
-@Component
 public class InnerServer implements SmartLifecycle {
 
     private final InnerServerProperties properties;

@@ -1,10 +1,10 @@
 package com.gapache.vertx.web.zeus;
 
+import com.gapache.vertx.core.PathHelper;
 import com.gapache.vertx.web.annotation.DeleteRouting;
 import com.gapache.vertx.web.annotation.GetRouting;
 import com.gapache.vertx.web.annotation.PostRouting;
 import com.gapache.vertx.web.annotation.PutRouting;
-import com.gapache.vertx.web.core.PathHelper;
 import io.vertx.core.http.HttpMethod;
 import org.springframework.core.annotation.AnnotationUtils;
 

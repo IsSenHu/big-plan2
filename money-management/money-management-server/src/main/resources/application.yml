@@ -20,6 +20,8 @@ spring:
     nacos:
       discovery:
         server-addr: 159.75.109.113:8848
+        metadata:
+          zeus-port: ${com.gapache.job.executor.local-port}
 com:
   gapache:
     security:
@@ -31,4 +33,12 @@ com:
         name: 金钱管理
         from-server-public-key: fromServerPublicKey
         to-server-private-key: toServerPrivateKey
-        local-port: 9999
+        local-port: 9998
+        rpc: zeus
+    vertx:
+      web:
+        settings:
+          port: ${com.gapache.job.executor.local-port}
+      settings:
+        cluster: false
+

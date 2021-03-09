@@ -21,4 +21,6 @@ public class ExecutorRegistryProperties {
     private String fromServerPublicKey;
 
     private int localPort;
+
+    private String rpc;
 }

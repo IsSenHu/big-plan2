@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: test
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 159.75.109.113:8848
+        metadata:
+          zeus-port: ${com.gapache.vertx.web.settings.port}
+com:
+  gapache:
+    vertx:
+      web:
+        settings:
+          port: 8081

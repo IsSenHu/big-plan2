@@ -1,9 +1,9 @@
 package com.gapache.vertx.web.config;
 
+import com.gapache.vertx.core.VertxManager;
+import com.gapache.vertx.core.VertxSettings;
 import com.gapache.vertx.web.annotation.EnableZeusClients;
 import com.gapache.vertx.web.annotation.ZeusClient;
-import com.gapache.vertx.web.core.VertxManager;
-import com.gapache.vertx.web.core.VertxSettings;
 import com.gapache.vertx.web.zeus.ZeusClientProxyFactory;
 import io.vertx.core.http.HttpClient;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +63,7 @@ public class HttpClientAutoConfiguration implements BeanDefinitionRegistryPostPr
             return;
         }
         // TODO settings And cache client
-        HttpClient httpClient = VertxManager.getVertx().createHttpClient();
+        HttpClient httpClient = VertxManager.checkNewStandalone().createHttpClient();
 
         enableZeusClientsConfigMap.forEach((name, configBean) -> {
             EnableZeusClients enableZeusClients = AnnotationUtils.findAnnotation(configBean.getClass(), EnableZeusClients.class);

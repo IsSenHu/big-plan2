@@ -1,5 +1,6 @@
 package com.gapache.vertx.web.test;
 
+import com.gapache.vertx.web.annotation.EnableVertxWeb;
 import com.gapache.vertx.web.annotation.EnableZeusClients;
 import com.gapache.vertx.web.test.client.P;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 @EnableZeusClients(basePackageClasses = P.class)
 @SpringBootApplication
+@EnableVertxWeb
 public class Application {
 
     public static void main(String[] args) {

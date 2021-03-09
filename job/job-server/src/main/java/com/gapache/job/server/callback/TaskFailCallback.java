@@ -25,6 +25,6 @@ public class TaskFailCallback implements Callback {
         // 重发消息进行重试
         channelHandlerContext.writeAndFlush(serverMessage);
         // 把自己保存回去
-        CallbackCache.save(message.getMessageId(), this);
+        CallbackCache.save("fail:" + message.getMessageId(), this);
     }
 }

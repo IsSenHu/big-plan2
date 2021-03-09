@@ -1,4 +1,4 @@
-package com.gapache.vertx.web.core;
+package com.gapache.vertx.core;
 
 /**
  * Verticle Bean 接口

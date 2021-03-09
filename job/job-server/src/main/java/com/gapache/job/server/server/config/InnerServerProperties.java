@@ -1,4 +1,4 @@
-package com.gapache.job.sdk.config;
+package com.gapache.job.server.server.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,4 +16,6 @@ public class InnerServerProperties {
     private String toExecutorPrivateKey;
 
     private String fromExecutorPublicKey;
+
+    private String rpc = "zeus";
 }

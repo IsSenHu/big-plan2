@@ -1,25 +1,21 @@
 package com.gapache.job.server.callback;
 
+import com.alibaba.fastjson.JSON;
 import com.gapache.commons.utils.ContextUtils;
 import com.gapache.job.common.Callback;
 import com.gapache.job.common.model.ClientMessage;
 import com.gapache.job.common.model.TaskResult;
-import com.gapache.job.common.utils.CallbackCache;
-import com.gapache.job.server.dao.entity.JobEntity;
-import com.gapache.job.server.dao.entity.JobGroupEntity;
+import com.gapache.job.common.model.ZeusServerMessage;
+import com.gapache.job.sdk.client.zeus.client.ExecutorClient;
 import com.gapache.job.server.dao.entity.JobLogEntity;
-import com.gapache.job.server.dao.repository.JobGroupRepository;
-import com.gapache.job.server.dao.repository.JobLogRepository;
-import com.gapache.job.server.dao.repository.JobRepository;
-import com.gapache.job.server.warner.Warner;
-import com.gapache.job.server.warner.WarnerUtils;
+import com.gapache.job.server.server.EventConsumerManager;
 import com.gapache.protobuf.utils.ProtocstuffUtils;
+import com.gapache.vertx.core.VertxManager;
+import com.gapache.vertx.redis.support.SimpleRedisRepository;
+import com.gapache.vertx.redis.support.SuccessType;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
-
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author HuSen
@@ -27,7 +23,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class TaskResultCallback implements Callback {
-
+    public static final String ZEUS_TASK_FAIL_CALLBACK_CACHE =  "ZeusTaskFailCallbackCache";
+    public static final String ZEUS_TASK_RESULT_CALLBACK_CACHE = "ZeusTaskResultCallbackCache";
     private final int retryTimes;
 
     public TaskResultCallback(int retryTimes) {
@@ -39,53 +36,54 @@ public class TaskResultCallback implements Callback {
         if (message.getType() == ClientMessage.Type.RESULT.getType()) {
             byte[] data = message.getData();
             ApplicationContext applicationContext = ContextUtils.getApplicationContext();
-            JobLogRepository jobLogRepository = applicationContext.getBean(JobLogRepository.class);
-            TaskResult taskResult = ProtocstuffUtils.byte2Bean(data, TaskResult.class);
-            JobLogEntity jobLog = jobLogRepository.findByMessageId(taskResult.getMessageId());
-            final int times = 10;
-            int i = 0;
-            while (jobLog == null && i++ < times) {
-                jobLog = jobLogRepository.findByMessageId(taskResult.getMessageId());
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                } catch (InterruptedException ignored) {}
-            }
-
-            if (jobLog == null) {
-                return;
-            }
-            // 失败重试，记录重试的次数，并且重新发送该消息
-            if (taskResult.getCode() != TaskResult.SUCCESS && jobLog.getRetryTimes() < retryTimes) {
-                jobLog.setRetryTimes(jobLog.getRetryTimes() + 1);
-                CallbackCache.get("fail:" + message.getMessageId()).callback(message);
-                // 再把自己保存回去
-                CallbackCache.save(message.getMessageId(), this);
-            } else {
-                jobLog.setExecutorResult(taskResult.getCode() == TaskResult.SUCCESS);
-                jobLog.setExecutorTime(taskResult.getExecutorTime());
-                jobLog.setExecutorRemark(taskResult.getRemark());
-
-                // 执行失败的话需要warning
-                if (!jobLog.getExecutorResult()) {
-                    JobRepository jobRepository = applicationContext.getBean(JobRepository.class);
-                    Optional<JobEntity> job = jobRepository.findById(jobLog.getJobId());
-                    String params = jobLog.getParams();
-                    job.ifPresent(j -> {
-                        JobGroupRepository jobGroupRepository = applicationContext.getBean(JobGroupRepository.class);
-                        Optional<JobGroupEntity> jobGroup = jobGroupRepository.findById(j.getJobGroupId());
-                        jobGroup.ifPresent(g -> {
-                            String localPort = applicationContext.getEnvironment().getProperty("com.gapache.job.executor.local-port");
-                            if (StringUtils.isBlank(localPort)) {
-                                localPort = applicationContext.getEnvironment().getProperty("com.gapache.job.executor.localPort");
-                            }
-                            WarnerUtils.warning(g, j, params, StringUtils.isBlank(localPort) ? 9999 : Integer.parseInt(localPort), taskResult.getRemark());
-                        });
-                    });
-                }
-                // 移除不需要的failCallBack
-                CallbackCache.get("fail:" + message.getMessageId());
-            }
-            jobLogRepository.save(jobLog);
+            ExecutorClient executorClient = applicationContext.getBean(ExecutorClient.class);
+            SimpleRedisRepository simpleRedisRepository = applicationContext.getBean(SimpleRedisRepository.class);
+            simpleRedisRepository.findById(message.getMessageId(), JobLogEntity.class)
+                    .onSuccess(jobLog -> {
+                        if (jobLog == null) {
+                            log.error("没有找到对应的日志:{}.", message.getMessageId());
+                            return;
+                        }
+                        TaskResult taskResult = ProtocstuffUtils.byte2Bean(data, TaskResult.class);
+                        System.out.println(message.getMessageId() + taskResult + jobLog + retryTimes);
+                        // 失败重试，记录重试的次数，并且重新发送该消息
+                        if (taskResult.getCode() != TaskResult.SUCCESS && jobLog.getRetryTimes() < retryTimes) {
+                            // 重试次数加1
+                            jobLog.setRetryTimes(jobLog.getRetryTimes() + 1);
+                            simpleRedisRepository.save(jobLog)
+                                    .onSuccess(res -> {
+                                        if (SuccessType.SET_OK.success(res)) {
+                                            // 开始执行失败回调也就是重试
+                                            VertxManager.getVertx().sharedData().<String, String>getAsyncMap(ZEUS_TASK_FAIL_CALLBACK_CACHE)
+                                                    .onSuccess(map -> {
+                                                        // 移除并获取
+                                                        map.remove(message.getMessageId())
+                                                                .onSuccess(body -> {
+                                                                    JsonObject jsonObject = new JsonObject(body);
+                                                                    Integer retryTime = jsonObject.getInteger("retryTime");
+                                                                    ZeusServerMessage zeusServerMessage = JSON.parseObject(jsonObject.getJsonObject("zeusServerMessage").toString(), ZeusServerMessage.class);
+                                                                    new ZeusTaskFailCallback(executorClient, zeusServerMessage, retryTime).callback(message);
+                                                                });
+                                                    });
+                                        }
+                                    });
+                        } else {
+                            jobLog.setExecutorResult(taskResult.getCode() == TaskResult.SUCCESS);
+                            jobLog.setExecutorTime(taskResult.getExecutorTime());
+                            jobLog.setExecutorRemark(taskResult.getRemark());
+                            // 移除不需要的failCallBack
+                            VertxManager.getVertx().sharedData().<String, String>getAsyncMap(ZEUS_TASK_FAIL_CALLBACK_CACHE)
+                                    .onSuccess(map -> map.remove(message.getMessageId()));
+                            // 移除不需要的resultCallback
+                            System.out.println("REMOVE: " + message.getMessageId());
+                            // 广播模式下移除会有问题
+                            VertxManager.getVertx().sharedData().<String, String>getAsyncMap(ZEUS_TASK_RESULT_CALLBACK_CACHE)
+                                    .onSuccess(map -> map.remove(message.getMessageId()));
+                            // 发布最终的处理事件
+                            VertxManager.getVertx().eventBus().send(EventConsumerManager.JOB_FINALLY_RESULT_DEAL_ADDRESS, JSON.toJSONString(jobLog));
+                        }
+                    })
+                    .onFailure(error -> log.error("没有找到对应的日志:{}.", message.getMessageId(), error));
         }
     }
 }

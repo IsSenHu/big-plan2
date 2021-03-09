@@ -9,7 +9,7 @@ import com.gapache.commons.utils.BeanCopyUtils;
 import com.gapache.job.common.model.JobStatus;
 import com.gapache.job.common.model.JobVO;
 import com.gapache.job.common.model.TriggerTaskRequest;
-import com.gapache.job.sdk.config.InnerServerProperties;
+import com.gapache.job.server.server.config.InnerServerProperties;
 import com.gapache.job.server.dao.entity.JobEntity;
 import com.gapache.job.server.dao.entity.JobGroupEntity;
 import com.gapache.job.server.dao.repository.JobGroupRepository;

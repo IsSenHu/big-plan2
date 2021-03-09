@@ -8,8 +8,7 @@ spring:
       discovery:
         server-addr: 159.75.109.113:8848
         metadata:
-          server:
-            port: ${com.gapache.job.server.port}
+          zeus-port: ${com.gapache.job.server.port}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://159.75.109.113:3306/job_server?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
@@ -45,7 +44,12 @@ com:
         port: 9926
         to-executor-private-key: toExecutorPrivateKey
         from-executor-public-key: fromExexutorPublicKey
+        rpc: zeus
     security:
       client-id: job123456job
-      update-resources: true
+      update-resources: false
       register-remote: true
+    vertx:
+      web:
+        settings:
+          port: ${com.gapache.job.server.port}

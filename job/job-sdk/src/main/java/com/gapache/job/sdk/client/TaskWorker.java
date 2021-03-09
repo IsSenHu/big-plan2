@@ -41,7 +41,7 @@ public class TaskWorker implements Runnable {
                         log.info("create task thread {}", name);
                         while (!Thread.currentThread().isInterrupted()) {
                             try {
-                                ServerMessageHandler.TaskExecutor taskExecutor = ServerMessageHandler.TaskPuller.take(name);
+                                Runnable taskExecutor = TaskPuller.take(name);
                                 if (taskExecutor != null) {
                                     taskExecutor.run();
                                 }

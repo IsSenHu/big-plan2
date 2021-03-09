@@ -1,4 +1,4 @@
-package com.gapache.vertx.web.core;
+package com.gapache.vertx.core;
 
 import org.springframework.util.StringUtils;
 

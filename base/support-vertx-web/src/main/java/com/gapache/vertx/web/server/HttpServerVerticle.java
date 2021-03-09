@@ -1,7 +1,7 @@
 package com.gapache.vertx.web.server;
 
-import com.gapache.vertx.web.core.VertxManager;
-import com.gapache.vertx.web.core.VertxSettings;
+import com.gapache.vertx.core.VertxManager;
+import com.gapache.vertx.core.VertxSettings;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
@@ -24,7 +24,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        server = VertxManager.getVertx().createHttpServer();
+        server = VertxManager.checkNewStandalone().createHttpServer();
 
         server.requestHandler(router).listen(settings.getPort(), res -> {
             if (res.succeeded()) {

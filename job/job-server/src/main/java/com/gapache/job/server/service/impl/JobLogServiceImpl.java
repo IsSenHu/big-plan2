@@ -3,16 +3,13 @@ package com.gapache.job.server.service.impl;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.job.common.model.JobLogVO;
-import com.gapache.job.server.dao.entity.JobLogEntity;
-import com.gapache.job.server.dao.repository.JobLogRepository;
 import com.gapache.job.server.service.JobLogService;
-import com.gapache.jpa.PageHelper;
+import com.gapache.vertx.redis.support.SimpleRedisRepository;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author HuSen
@@ -22,16 +19,22 @@ import javax.annotation.Resource;
 public class JobLogServiceImpl implements JobLogService {
 
     @Resource
-    private JobLogRepository jobLogRepository;
+    private SimpleRedisRepository simpleRedisRepository;
 
     @Override
     public PageResult<JobLogVO> page(IPageRequest<JobLogVO> iPageRequest) {
-        Pageable pageable = PageHelper.of(iPageRequest);
-        Page<JobLogEntity> page = jobLogRepository.findAll(pageable);
-        return PageResult.of(page.getTotalElements(), po -> {
-            JobLogVO vo = new JobLogVO();
-            BeanUtils.copyProperties(po, vo);
-            return vo;
-        }, page.getContent());
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        PageResult<JobLogVO> pageResult = new PageResult<>();
+        simpleRedisRepository.page(iPageRequest, JobLogVO.class)
+                .onSuccess(p -> {
+                    BeanUtils.copyProperties(p, pageResult);
+                    countDownLatch.countDown();
+                });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return pageResult;
     }
 }

@@ -8,7 +8,7 @@ import com.gapache.job.common.model.ClientInfo;
 import com.gapache.job.common.model.JobGroupVO;
 import com.gapache.job.common.model.JobInfo;
 import com.gapache.job.common.model.JobStatus;
-import com.gapache.job.sdk.config.InnerServerProperties;
+import com.gapache.job.server.server.config.InnerServerProperties;
 import com.gapache.job.server.dao.entity.JobEntity;
 import com.gapache.job.server.dao.entity.JobGroupEntity;
 import com.gapache.job.server.dao.repository.JobGroupRepository;

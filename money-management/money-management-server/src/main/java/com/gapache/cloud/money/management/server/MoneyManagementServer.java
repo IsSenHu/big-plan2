@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCommonAdvice
 @EnableJob
 public class MoneyManagementServer {
+
     public static void main(String[] args) {
         SpringApplication.run(MoneyManagementServer.class, args);
     }

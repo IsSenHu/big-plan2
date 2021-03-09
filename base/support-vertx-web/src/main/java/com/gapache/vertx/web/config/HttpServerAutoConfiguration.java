@@ -1,8 +1,9 @@
 package com.gapache.vertx.web.config;
 
+import com.gapache.vertx.core.VertxCreatedEvent;
+import com.gapache.vertx.core.VertxManager;
+import com.gapache.vertx.core.VertxSettings;
 import com.gapache.vertx.web.annotation.*;
-import com.gapache.vertx.web.core.VertxManager;
-import com.gapache.vertx.web.core.VertxSettings;
 import com.gapache.vertx.web.handler.*;
 import com.gapache.vertx.web.server.HttpServerVerticle;
 import com.gapache.vertx.web.server.NoOpWebServer;
@@ -14,13 +15,14 @@ import io.vertx.ext.web.handler.BodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.reflect.Java15AnnotationFinder;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
@@ -32,7 +34,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.gapache.vertx.web.core.PathHelper.correctPath;
+import static com.gapache.vertx.core.PathHelper.correctPath;
 
 /**
  * @author HuSen
@@ -40,10 +42,10 @@ import static com.gapache.vertx.web.core.PathHelper.correctPath;
  */
 @Slf4j
 @Configuration
+@ConditionalOnBean(annotation = EnableVertxWeb.class)
 @EnableConfigurationProperties(VertxSettings.HttpServer.class)
-public class HttpServerAutoConfiguration implements SmartLifecycle, ApplicationContextAware {
+public class HttpServerAutoConfiguration implements ApplicationListener<VertxCreatedEvent>, ApplicationContextAware {
 
-    private boolean running;
     private ApplicationContext context;
     private final VertxSettings.HttpServer settings;
     private final Java15AnnotationFinder java15AnnotationFinder;
@@ -55,15 +57,22 @@ public class HttpServerAutoConfiguration implements SmartLifecycle, ApplicationC
     }
 
     @Override
+    public void onApplicationEvent(@NonNull VertxCreatedEvent event) {
+        if (event.isSuccess()) {
+            start();
+        } else {
+            throw new RuntimeException("Vertx created fail");
+        }
+    }
+
     public void start() {
-        this.running = true;
         // 扫描Controller => VertxController
         Map<String, Object> vertxControllerMap = context.getBeansWithAnnotation(VertxController.class);
         if (log.isDebugEnabled()) {
             log.debug("vert.x web >>>>>> 扫描到 VertxController{}, {}", System.lineSeparator(), Json.encode(vertxControllerMap));
         }
 
-        Router router = Router.router(VertxManager.getVertx());
+        Router router = Router.router(VertxManager.checkNewStandalone());
         // 404
         StatusCode404Handler statusCode404Handler = new StatusCode404Handler();
         vertxControllerMap.values().forEach(vertxController -> {
@@ -101,7 +110,7 @@ public class HttpServerAutoConfiguration implements SmartLifecycle, ApplicationC
 
         HttpServerVerticle httpServerVerticle = new HttpServerVerticle(settings, router);
         // TODO settings
-        VertxManager.getVertx().deployVerticle(httpServerVerticle)
+        VertxManager.checkNewStandalone().deployVerticle(httpServerVerticle)
                 .onComplete(as -> {
                     if (as.succeeded()) {
                         // 这是为了能够注册到nacos上
@@ -177,16 +186,6 @@ public class HttpServerAutoConfiguration implements SmartLifecycle, ApplicationC
             return route;
         }
         return null;
-    }
-
-    @Override
-    public void stop() {
-        this.running = false;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return this.running;
     }
 
     @Override

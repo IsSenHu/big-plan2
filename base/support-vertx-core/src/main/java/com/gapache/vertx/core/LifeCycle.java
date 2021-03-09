@@ -1,4 +1,4 @@
-package com.gapache.vertx.web.core;
+package com.gapache.vertx.core;
 
 /**
  * 公共生命周期接口

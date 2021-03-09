@@ -5,6 +5,7 @@ import com.gapache.job.sdk.annotation.EnableJob;
 import com.gapache.job.sdk.client.InnerClient;
 import com.gapache.job.sdk.registry.ExecutorRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,11 +27,13 @@ public class ExecutorRegistryAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(value = "com.gapache.job.executor.rpc", havingValue = "netty")
     public InnerClient innerClient(ExecutorRegistryProperties properties) {
         return new InnerClient(properties);
     }
 
     @Bean
+    @ConditionalOnProperty(value = "com.gapache.job.executor.rpc", havingValue = "netty")
     public JobServerChecker jobServerChecker() {
         return new JobServerChecker();
     }

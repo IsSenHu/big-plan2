@@ -27,8 +27,10 @@ public class TypeUtils {
             if (actualTypes[0] instanceof ParameterizedType) {
                 parameterizedType = (ParameterizedType) actualTypes[0];
                 return parameterizedType.getRawType();
+            } else {
+                return actualTypes[0];
             }
         }
-        return null;
+        return type;
     }
 }
