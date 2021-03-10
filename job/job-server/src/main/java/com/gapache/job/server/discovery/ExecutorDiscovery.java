@@ -38,7 +38,7 @@ public class ExecutorDiscovery implements SmartInitializingSingleton {
     public void scan(ClientInfo clientInfo) {
         DistributedLock lock = DistributedLock.getLock("SCAN_EXECUTOR:" + clientInfo.getAppName());
         try {
-            final long timeout = 2;
+            final long timeout = 10;
             if (lock.tryLock(timeout, TimeUnit.SECONDS)) {
                 List<Instance> instances = namingService.selectInstances(clientInfo.getAppName(), GROUP, true);
                 jobGroupService.checkAndSave(clientInfo, instances);
