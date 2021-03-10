@@ -87,8 +87,10 @@ public class JobServerClientImpl implements SmartInitializingSingleton, JobServe
             if (clientMessage != null) {
                 VertxManager.getVertx().sharedData().<String, String>getAsyncMap(TaskResultCallback.ZEUS_TASK_RESULT_CALLBACK_CACHE)
                         .onSuccess(am -> am.get(clientMessage.getMessageId()).onSuccess(str -> {
-                            System.out.println(str);
-                            System.out.println(clientMessage.getMessageId());
+                            if (str == null) {
+                                log.warn("{} a key {} is not found", TaskResultCallback.ZEUS_TASK_RESULT_CALLBACK_CACHE, clientMessage.getMessageId());
+                                return;
+                            }
                             TaskResultCallback callback = new TaskResultCallback(new JsonObject(str).getInteger("retryTime"));
                             callback.callback(clientMessage);
                         }));

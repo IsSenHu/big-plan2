@@ -85,21 +85,28 @@ public class ZeusServerMessageSender implements ServerMessageSender {
     public void broadcastMessage(JobEntity job, JobGroupEntity group, String version, String params, int port) {
         JobLogEntity jobLog = JobLogEntity.of(job.getId());
         jobLog.setParams(params);
-        String messageId = UUID.randomUUID().toString();
-        jobLog.setId(messageId);
+        jobLog.setId(UUID.randomUUID().toString());
 
         try {
             ILoadBalancer iLoadBalancer = cachingSpringLoadBalancerFactory.create(group.getAppName());
             List<Server> reachableServers = iLoadBalancer.getReachableServers();
             ServerIntrospector serverIntrospector = cachingSpringLoadBalancerFactory.createServerIntrospector(group.getAppName());
+            if (reachableServers.isEmpty()) {
+                throw new IllegalStateException("no reachableServers");
+            }
             for (Server reachableServer : reachableServers) {
+                String messageId = UUID.randomUUID().toString();
+                JobLogEntity log = JobLogEntity.of(job.getId());
+                log.setParams(params);
+                log.setId(messageId);
+
                 String host = reachableServer.getHost();
                 String zeusPort = serverIntrospector.getMetadata(reachableServer).get("zeus-port");
 
                 ZeusServerMessage zeusServerMessage = new ZeusServerMessage();
                 zeusServerMessage.setIp(host);
                 zeusServerMessage.setPort(Integer.parseInt(zeusPort));
-                sendTaskInfo(zeusServerMessage, group, job, params, port, jobLog, messageId, version);
+                sendTaskInfo(zeusServerMessage, group, job, params, port, log, messageId, version);
             }
         } catch (Exception e) {
             jobLog.setTriggerResult(false);

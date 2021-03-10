@@ -29,7 +29,6 @@ public class ZeusTaskFailCallback implements Callback {
 
     @Override
     public void callback(ClientMessage message) {
-        System.out.println("ZeusTaskFailCallback " + message.getMessageId());
         // 把自己保存回去
         VertxManager.getVertx().sharedData().<String, String>getAsyncMap(TaskResultCallback.ZEUS_TASK_FAIL_CALLBACK_CACHE)
                 .onSuccess(res -> res.put(message.getMessageId(), new JsonObject().put("retryTimes", retryTimes).put("zeusServerMessage", zeusServerMessage).toString())

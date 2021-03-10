@@ -45,7 +45,6 @@ public class TaskResultCallback implements Callback {
                             return;
                         }
                         TaskResult taskResult = ProtocstuffUtils.byte2Bean(data, TaskResult.class);
-                        System.out.println(message.getMessageId() + taskResult + jobLog + retryTimes);
                         // 失败重试，记录重试的次数，并且重新发送该消息
                         if (taskResult.getCode() != TaskResult.SUCCESS && jobLog.getRetryTimes() < retryTimes) {
                             // 重试次数加1
@@ -75,7 +74,6 @@ public class TaskResultCallback implements Callback {
                             VertxManager.getVertx().sharedData().<String, String>getAsyncMap(ZEUS_TASK_FAIL_CALLBACK_CACHE)
                                     .onSuccess(map -> map.remove(message.getMessageId()));
                             // 移除不需要的resultCallback
-                            System.out.println("REMOVE: " + message.getMessageId());
                             // 广播模式下移除会有问题
                             VertxManager.getVertx().sharedData().<String, String>getAsyncMap(ZEUS_TASK_RESULT_CALLBACK_CACHE)
                                     .onSuccess(map -> map.remove(message.getMessageId()));

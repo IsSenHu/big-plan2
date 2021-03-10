@@ -45,17 +45,18 @@ public class ExecutorClientImpl implements ExecutorClient {
                     TaskExecutor taskExecutor = new TaskExecutor(taskInfo, message.getMessageId(), cm -> jobServerClient.send(cm).onComplete(TaskExecutor.LOGGER));
 
                     switch (taskInfo.getBlockingStrategy()) {
-                        case COVER: {
-                            // 清空队列。
-                            TaskPuller.clear(taskInfo.getName());
-                            // 覆盖之前的任务阻塞策略
-                            TaskPuller.push(taskInfo.getName(), taskExecutor);
-                        }
                         case DISCARD: {
                             // 丢弃后续的任务
                             if (!TaskPuller.isEmpty(taskInfo.getName())) {
                                 break;
                             }
+                            TaskPuller.push(taskInfo.getName(), taskExecutor);
+                            break;
+                        }
+                        case COVER: {
+                            // 清空队列。
+                            TaskPuller.clear(taskInfo.getName());
+                            // 覆盖之前的任务阻塞策略
                             TaskPuller.push(taskInfo.getName(), taskExecutor);
                             break;
                         }
