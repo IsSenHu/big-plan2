@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.boot.web.reactive.context.StandardReactiveWebEnvironment;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,6 +30,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.support.StandardServletEnvironment;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -116,15 +118,17 @@ public class HttpServerAutoConfiguration implements ApplicationListener<VertxCre
                         // 这是为了能够注册到nacos上
                         Environment environment = context.getEnvironment();
                         // 非Web环境的标准环境
-                        if (environment instanceof StandardEnvironment) {
-                            context.publishEvent(new WebServerInitializedEvent(new NoOpWebServer(settings.getPort())) {
-                                private static final long serialVersionUID = -3737413969588035128L;
-                                @Override
-                                public WebServerApplicationContext getApplicationContext() {
-                                    return new ServletWebServerApplicationContext();
-                                }
-                            });
+                        if ((environment instanceof StandardServletEnvironment) || (environment instanceof StandardReactiveWebEnvironment)) {
+                            return;
                         }
+
+                        context.publishEvent(new WebServerInitializedEvent(new NoOpWebServer(settings.getPort())) {
+                            private static final long serialVersionUID = -3737413969588035128L;
+                            @Override
+                            public WebServerApplicationContext getApplicationContext() {
+                                return new ServletWebServerApplicationContext();
+                            }
+                        });
                     }
                 });
     }
