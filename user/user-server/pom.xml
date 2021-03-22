@@ -28,9 +28,10 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
 
+        <!-- Sentinel -->
         <dependency>
             <groupId>com.gapache</groupId>
-            <artifactId>support-web</artifactId>
+            <artifactId>support-cloud-sentinel</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

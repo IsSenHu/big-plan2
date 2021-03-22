@@ -3,7 +3,7 @@ package com.gapahce.gateway.filter;
 import com.alibaba.fastjson.JSON;
 import com.gapache.commons.model.AuthConstants;
 import com.gapache.protobuf.utils.ProtocstuffUtils;
-import com.gapache.security.checker.SecurityChecker;
+import com.gapache.security.checker.AsyncSecurityChecker;
 import com.gapache.security.checker.SignChecker;
 import com.gapache.security.model.AccessCard;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.StopWatch;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,11 +33,11 @@ import static com.gapache.commons.model.AuthConstants.TOKEN_HEADER;
 @Component
 public class SecurityFilter implements GlobalFilter, Ordered {
 
-    private final SecurityChecker securityChecker;
+    private final AsyncSecurityChecker asyncSecurityChecker;
     private final SignChecker signChecker;
 
-    public SecurityFilter(SecurityChecker securityChecker, SignChecker signChecker) {
-        this.securityChecker = securityChecker;
+    public SecurityFilter(AsyncSecurityChecker asyncSecurityChecker, SignChecker signChecker) {
+        this.asyncSecurityChecker = asyncSecurityChecker;
         this.signChecker = signChecker;
     }
 
@@ -49,33 +48,36 @@ public class SecurityFilter implements GlobalFilter, Ordered {
         if (StringUtils.isBlank(token)) {
             return chain.filter(exchange);
         }
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        AccessCard accessCard = securityChecker.checking(token);
-        log.info("解析token花费时间:{}", stopWatch.getTotalTimeMillis());
-        stopWatch.stop();
 
-        if (accessCard != null) {
-            byte[] message = ProtocstuffUtils.bean2Byte(accessCard, AccessCard.class);
-            if (message != null) {
-                String value = Base64Utils.encodeToString(message);
-                log.info("{} :{}", AuthConstants.ACCESS_CARD_HEADER, value);
-                exchange.getRequest().mutate()
-                        .headers(httpHeaders -> httpHeaders.add(AuthConstants.ACCESS_CARD_HEADER, value));
-            }
-            // 如果解析出了access card，就进行签名验证
-            // 不必担心请求不传token的情况，因为需要签名验证的接口，一定是需要access card的，所以不传也会被资源服务器自己所拦截
-            if (accessCard.getSign()) {
-                String body = resolveBodyFromRequest(exchange.getRequest());
-                if (StringUtils.isNotBlank(body)) {
-                    if (!signChecker.checkSign(JSON.parseObject(body), accessCard.getClientId())) {
-                        return Mono.create(ms -> ms.error(new IllegalAccessError("sign error")));
+        return Mono.create(ms -> asyncSecurityChecker.checking(token)
+                .onSuccess(accessCard -> {
+                    byte[] message = ProtocstuffUtils.bean2Byte(accessCard, AccessCard.class);
+                    if (message != null) {
+                        String value = Base64Utils.encodeToString(message);
+                        log.info("{} :{}", AuthConstants.ACCESS_CARD_HEADER, value);
+                        exchange.getRequest().mutate()
+                                .headers(httpHeaders -> httpHeaders.add(AuthConstants.ACCESS_CARD_HEADER, value));
                     }
-                }
-            }
-        }
+                    // 如果解析出了access card，就进行签名验证
+                    // 不必担心请求不传token的情况，因为需要签名验证的接口，一定是需要access card的，所以不传也会被资源服务器自己所拦截
+                    if (accessCard.getSign()) {
+                        String body = resolveBodyFromRequest(exchange.getRequest());
+                        if (StringUtils.isNotBlank(body)) {
+                            if (!signChecker.checkSign(JSON.parseObject(body), accessCard.getClientId())) {
+                                ms.error(new IllegalAccessError("sign error"));
+                            }
+                        }
+                    }
 
-        return chain.filter(exchange);
+                    chain.filter(exchange)
+                            .doFinally(t -> ms.success())
+                            .subscribe(ms::success);
+
+                })
+                .onFailure(error -> {
+                    log.error(">>>>>>", error);
+                    ms.error(error);
+                }));
     }
 
     private String resolveBodyFromRequest(ServerHttpRequest serverHttpRequest) {

@@ -1,12 +1,17 @@
 package com.gapache.security.config;
 
 import com.gapache.commons.security.RSAUtils;
+import com.gapache.security.checker.AsyncSecurityChecker;
 import com.gapache.security.checker.SecurityChecker;
 import com.gapache.security.checker.impl.DefaultSignChecker;
+import com.gapache.security.checker.impl.LocalAsyncSecurityChecker;
 import com.gapache.security.checker.impl.LocalSecurityChecker;
-import com.gapache.security.interfaces.AuthorizeInfoManager;
+import com.gapache.security.core.AsyncRedisAuthorizeInfoManager;
 import com.gapache.security.core.RedisAuthorizeInfoManager;
+import com.gapache.security.interfaces.AsyncAuthorizeInfoManager;
+import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.properties.SecurityProperties;
+import com.gapache.vertx.redis.support.SimpleRedisRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,10 +40,17 @@ public class SecurityAutoConfiguration {
     }
 
     @ConditionalOnProperty("com.gapache.security.public-key")
+    @Bean("localAsyncSecurityChecker")
+    public AsyncSecurityChecker asyncSecurityChecker(SimpleRedisRepository simpleRedisRepository) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        log.info("启用公钥解密############AsyncSecurityChecker");
+        return new LocalAsyncSecurityChecker(
+                RSAUtils.getPublicKey(securityProperties.getPublicKey().trim().replaceAll(" ", "")),
+                asyncAuthorizeInfoManager(simpleRedisRepository));
+    }
+
     @Bean("localSecurityChecker")
-    public SecurityChecker localSecurityChecker(AuthorizeInfoManager authorizeInfoManager) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        log.info("启用公钥解密############");
-        return new LocalSecurityChecker(RSAUtils.getPublicKey(securityProperties.getPublicKey().trim().replaceAll(" ", "")), authorizeInfoManager);
+    public SecurityChecker localSecurityChecker(SimpleRedisRepository simpleRedisRepository) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        return new LocalSecurityChecker(asyncSecurityChecker(simpleRedisRepository));
     }
 
     @Bean
@@ -54,7 +66,12 @@ public class SecurityAutoConfiguration {
     }
 
     @Bean
-    public AuthorizeInfoManager authorizeInfoManager(StringRedisTemplate stringRedisTemplate) {
-        return new RedisAuthorizeInfoManager(stringRedisTemplate);
+    public AsyncAuthorizeInfoManager asyncAuthorizeInfoManager(SimpleRedisRepository simpleRedisRepository) {
+        return new AsyncRedisAuthorizeInfoManager(simpleRedisRepository);
+    }
+
+    @Bean
+    public AuthorizeInfoManager authorizeInfoManager(SimpleRedisRepository simpleRedisRepository) {
+        return new RedisAuthorizeInfoManager(asyncAuthorizeInfoManager(simpleRedisRepository));
     }
 }

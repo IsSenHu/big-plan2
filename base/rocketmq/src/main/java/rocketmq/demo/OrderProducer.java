@@ -18,7 +18,7 @@ public class OrderProducer {
 
     public static void main(String[] args) throws MQClientException, UnsupportedEncodingException, RemotingException, InterruptedException, MQBrokerException {
         DefaultMQProducer producer = new DefaultMQProducer("demo_producer_order_group");
-        producer.setNamesrvAddr("118.24.38.46:9876");
+        producer.setNamesrvAddr("106.52.162.34:9876");
         producer.start();
         // keys 消息的唯一键
         for (int i = 0; i < 5; i++) {

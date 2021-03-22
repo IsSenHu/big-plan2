@@ -22,6 +22,17 @@ spring:
         server-addr: 159.75.109.113:8848
         metadata:
           zeus-port: ${com.gapache.job.executor.local-port}
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      datasource:
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-degrade-config.json
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: degrade
 com:
   gapache:
     security:

@@ -8,6 +8,7 @@ import com.gapache.health.server.model.body.BodyDataQueryVO;
 import com.gapache.health.server.model.body.BodyDataVO;
 import com.gapache.health.server.model.body.BodyType;
 import com.gapache.health.server.service.BodyDataService;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;

@@ -18,9 +18,20 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.gapache</groupId>
             <artifactId>support-web</artifactId>
             <version>0.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.gapache</groupId>
+            <artifactId>user-sdk</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

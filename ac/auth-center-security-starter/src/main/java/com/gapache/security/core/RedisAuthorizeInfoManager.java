@@ -1,44 +1,68 @@
 package com.gapache.security.core;
 
-import com.alibaba.fastjson.JSON;
+import com.gapache.security.interfaces.AsyncAuthorizeInfoManager;
 import com.gapache.security.interfaces.AuthorizeInfoManager;
-import com.gapache.security.model.AuthorizeInfoDTO;
 import com.gapache.security.model.CustomerInfo;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author HuSen
  * @since 2020/8/4 6:19 下午
  */
+@Slf4j
 public class RedisAuthorizeInfoManager implements AuthorizeInfoManager {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final AsyncAuthorizeInfoManager asyncAuthorizeInfoManager;
 
-    public RedisAuthorizeInfoManager(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
+    public RedisAuthorizeInfoManager(AsyncAuthorizeInfoManager asyncAuthorizeInfoManager) {
+        this.asyncAuthorizeInfoManager = asyncAuthorizeInfoManager;
     }
 
     @Override
     public void save(String token, Long timeout, CustomerInfo customerInfo, Collection<String> scopes) {
-        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
-        AuthorizeInfoDTO authorizeInfoDTO = new AuthorizeInfoDTO();
-        authorizeInfoDTO.setCustomerInfo(customerInfo);
-        authorizeInfoDTO.setScopes(scopes);
-        opsForValue.set(token, JSON.toJSONString(authorizeInfoDTO), timeout, TimeUnit.MILLISECONDS);
+        AtomicBoolean wait = new AtomicBoolean(false);
+        asyncAuthorizeInfoManager.save(token, timeout, customerInfo, scopes)
+                .onComplete(as -> {
+                    wait.compareAndSet(false, true);
+                    if (!as.succeeded()) {
+                        log.error("save fail.", as.cause());
+                    }
+                });
+
+        while (!wait.get()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     @Override
     public void delete(String token) {
-        stringRedisTemplate.delete(token);
+        AtomicBoolean wait = new AtomicBoolean(false);
+        asyncAuthorizeInfoManager.delete(token)
+                .onComplete(as -> {
+                    wait.compareAndSet(false, true);
+                    if (!as.succeeded()) {
+                        log.error("delete fail.", as.cause());
+                    }
+                });
+
+        while (!wait.get()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     @Override
     public String get(String token) {
-        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
-        return opsForValue.get(token);
+        // TODO 暂时没用到，不用实现
+        return null;
     }
 }

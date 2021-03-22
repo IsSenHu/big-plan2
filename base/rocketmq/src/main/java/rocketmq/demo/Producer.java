@@ -16,11 +16,11 @@ import java.io.UnsupportedEncodingException;
 public class Producer {
 
     public static void main(String[] args) throws MQClientException, UnsupportedEncodingException, RemotingException, InterruptedException, MQBrokerException {
-        DefaultMQProducer producer = new DefaultMQProducer("demo_Producer_group");
-        producer.setNamesrvAddr("118.24.38.46:9876");
+        DefaultMQProducer producer = new DefaultMQProducer("test-topic-group");
+        producer.setNamesrvAddr("106.52.162.34:9876");
         producer.start();
         // keys 消息的唯一键
-        Message message = new Message("Topic_Demo", "Tags", "Keys_1", "hello!".getBytes(RemotingHelper.DEFAULT_CHARSET));
+        Message message = new Message("test-topic", "tagA", "Keys_1", "hello!".getBytes(RemotingHelper.DEFAULT_CHARSET));
         System.out.println(producer.send(message));
     }
 }

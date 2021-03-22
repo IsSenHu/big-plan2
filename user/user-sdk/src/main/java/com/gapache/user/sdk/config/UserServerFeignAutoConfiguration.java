@@ -16,7 +16,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @EnableFeignClients(basePackages = "com.gapache.user.sdk.feign")
 @ConditionalOnBean(annotation = EnableUserServerFeign.class)
-@Import(UserServerFeignFallback.class)
+@Import({
+        UserServerFeignFallback.class
+})
 public class UserServerFeignAutoConfiguration {
 
     /**

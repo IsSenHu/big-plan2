@@ -12,10 +12,11 @@
     </modules>
 
     <parent>
-        <artifactId>cloud-base</artifactId>
         <groupId>com.gapache</groupId>
+        <artifactId>base</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+
     <artifactId>ac</artifactId>
     <name>ac</name>
     <version>0.0.1-SNAPSHOT</version>

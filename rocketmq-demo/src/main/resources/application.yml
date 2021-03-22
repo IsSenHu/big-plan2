@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    stream:
+      rocketmq:
+        binder:
+          name-server: 106.52.162.34:9876
+        bindings:
+          output:
+            producer:
+              group: test-topic-group
+          input:
+            consumer:
+              tags: tagA
+      bindings:
+        output:
+          destination: test-topic
+        input:
+          destination: test-topic
+          group: test-topic-group

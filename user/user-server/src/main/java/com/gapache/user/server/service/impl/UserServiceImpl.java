@@ -2,14 +2,17 @@ package com.gapache.user.server.service.impl;
 
 import com.gapache.commons.model.ThrowUtils;
 import com.gapache.user.common.model.UserError;
+import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
 import com.gapache.user.server.dao.entity.UserEntity;
 import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
 import com.gapache.user.server.dao.repository.UserRepository;
-import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * @author HuSen
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserVO create(UserVO vo) {
         ThrowUtils.throwIfTrue(userRepository.existsByUsername(vo.getUsername()), UserError.USERNAME_EXISTED);
 
@@ -75,6 +79,51 @@ public class UserServiceImpl implements UserService {
             UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(vo.getId(), clientId);
             if (userCustomizeInfoEntity != null) {
                 vo.setCustomizeInfo(userCustomizeInfoEntity.getInfo());
+            }
+        }
+        return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean delete(Long id) {
+        userRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean update(UserVO vo) {
+        Optional<UserEntity> optional = userRepository.findById(vo.getId());
+        ThrowUtils.throwIfTrue(!optional.isPresent(), UserError.USER_NOT_FOUND);
+
+        optional.ifPresent(entity -> {
+            UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(entity.getId(), vo.getClient());
+            userCustomizeInfoEntity.setInfo(vo.getCustomizeInfo());
+            userCustomizeInfoRepository.save(userCustomizeInfoEntity);
+        });
+
+        return true;
+    }
+
+    @Override
+    public UserVO get(Long id, String clientId) {
+        Optional<UserEntity> optional = userRepository.findById(id);
+        ThrowUtils.throwIfTrue(!optional.isPresent(), UserError.USER_NOT_FOUND);
+
+        UserEntity userEntity = optional.get();
+        UserVO vo = new UserVO();
+        vo.setId(userEntity.getId());
+        vo.setUsername(userEntity.getUsername());
+        vo.setCreateTime(userEntity.getCreateTime());
+        vo.setLastModifiedTime(userEntity.getLastModifiedTime());
+        vo.setCreateBy(userEntity.getCreateBy());
+        vo.setLastModifiedBy(userEntity.getLastModifiedBy());
+
+        if (StringUtils.isNotBlank(clientId)) {
+            UserCustomizeInfoEntity customizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(userEntity.getId(), clientId);
+            if (customizeInfoEntity != null) {
+                vo.setCustomizeInfo(customizeInfoEntity.getInfo());
             }
         }
         return vo;

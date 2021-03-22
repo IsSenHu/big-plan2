@@ -1,4 +1,4 @@
-package com.gapache.security.exception;
+package com.gapache.commons.model;
 
 import com.gapache.commons.model.Error;
 import lombok.Getter;

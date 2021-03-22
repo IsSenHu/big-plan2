@@ -107,7 +107,7 @@ public class SimpleRedisRepository {
 
                         promise.complete(instance);
                     })
-                    .onFailure(t -> log.error("findById fail, because ", t));
+                    .onFailure(promise::fail);
         });
     }
 

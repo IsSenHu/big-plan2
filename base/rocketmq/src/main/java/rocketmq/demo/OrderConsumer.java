@@ -18,7 +18,7 @@ public class OrderConsumer {
 
     public static void main(String[] args) throws MQClientException {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("demo_consumer_order_group");
-        consumer.setNamesrvAddr("118.24.38.46:9876");
+        consumer.setNamesrvAddr("106.52.162.34:9876");
         consumer.subscribe("Topic_Order_Demo", "*");
         consumer.setConsumeMessageBatchMaxSize(2);
         consumer.setMessageListener((MessageListenerOrderly) (msgs, context) -> {

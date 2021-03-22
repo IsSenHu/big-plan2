@@ -24,13 +24,16 @@
         <module>support-cloud-zeus-discovery</module>
         <module>support-vertx-redis</module>
         <module>support-vertx-core</module>
+        <module>support-cloud-sentinel</module>
+        <module>support-cloud-stream-binder-rocketmq</module>
+        <module>support-cloud-starter-stream-rocketmq</module>
     </modules>
 
-    <!-- 基于spring-boot 2.2.2.RELEASE -->
+    <!-- 基于spring-boot 2.3.3.RELEASE -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.2.RELEASE</version>
+        <version>2.3.3.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -48,10 +51,10 @@
         <protobuf.version>3.11.1</protobuf.version>
         <!-- grpc 版本 -->
         <grpc.version>1.26.0</grpc.version>
-        <!-- spring-cloud 版本使用Hoxton.SR1 -->
-        <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
+        <!-- spring-cloud 版本使用2020.0.1 -->
+        <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
         <!--spring-cloud-alibaba 版本-->
-        <spring-cloud-alibaba.version>2.2.1.RELEASE</spring-cloud-alibaba.version>
+        <spring-cloud-alibaba.version>2.2.5.RELEASE</spring-cloud-alibaba.version>
         <!-- guava 版本 -->
         <guava.version>28.1-jre</guava.version>
         <!-- lang3 版本 -->
@@ -84,6 +87,10 @@
         <boot.mybatis.version>3.3.1.tmp</boot.mybatis.version>
         <!-- elastic-job 版本 -->
         <elastic.job.version>2.1.5</elastic.job.version>
+        <!-- vertx 版本 -->
+        <vertx.version>4.0.2</vertx.version>
+        <!-- stream binder rocketmq 版本 -->
+        <stream.binder.rocketmq>2.2.0.RELEASE</stream.binder.rocketmq>
     </properties>
 
     <dependencies>
@@ -209,25 +216,31 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-core</artifactId>
-                <version>4.0.2</version>
+                <version>${vertx.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-web</artifactId>
-                <version>4.0.2</version>
+                <version>${vertx.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-hazelcast</artifactId>
-                <version>4.0.2</version>
+                <version>${vertx.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-redis-client</artifactId>
-                <version>4.0.2</version>
+                <version>${vertx.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-stream-binder-rocketmq</artifactId>
+                <version>${stream.binder.rocketmq}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

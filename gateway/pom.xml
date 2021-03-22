@@ -24,50 +24,42 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
 
+        <!-- gateway 依赖 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-webflux</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.projectreactor.netty</groupId>
-                    <artifactId>reactor-netty</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>io.projectreactor.netty</groupId>
-            <artifactId>reactor-netty</artifactId>
-            <version>0.9.4.RELEASE</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webflux</artifactId>
-            <version>5.2.4.RELEASE</version>
-        </dependency>
-
+        <!-- commons -->
         <dependency>
             <groupId>com.gapache</groupId>
             <artifactId>commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <!-- protobuf -->
         <dependency>
             <groupId>com.gapache</groupId>
             <artifactId>support-protobuf</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <!-- 安全支持 -->
         <dependency>
             <groupId>com.gapache</groupId>
             <artifactId>auth-center-security-starter</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Sentinel限流 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
         </dependency>
     </dependencies>
 

@@ -17,7 +17,7 @@ import com.gapache.cloud.auth.server.service.UserService;
 import com.gapache.cloud.auth.server.utils.DynamicPropertyUtils;
 import com.gapache.commons.model.JsonResult;
 import com.gapache.commons.model.ThrowUtils;
-import com.gapache.security.exception.SecurityException;
+import com.gapache.commons.model.SecurityException;
 import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.model.*;
 import com.gapache.security.model.impl.CertificationImpl;

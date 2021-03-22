@@ -12,7 +12,7 @@ import com.gapache.cloud.auth.server.service.UserClientRelationService;
 import com.gapache.commons.model.Error;
 import com.gapache.commons.model.*;
 import com.gapache.security.checker.SecurityChecker;
-import com.gapache.security.exception.SecurityException;
+import com.gapache.commons.model.SecurityException;
 import com.gapache.security.model.AccessCard;
 import com.gapache.security.model.SecurityError;
 import com.gapache.security.model.TokenInfoDTO;

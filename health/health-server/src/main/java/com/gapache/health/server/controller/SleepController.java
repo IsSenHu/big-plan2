@@ -3,10 +3,10 @@ package com.gapache.health.server.controller;
 import com.gapache.commons.model.JsonResult;
 import com.gapache.health.server.model.sleep.SleepCreateVO;
 import com.gapache.health.server.service.SleepService;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.gapache.user.sdk.feign.UserServerFeign;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * @author HuSen
@@ -18,6 +18,9 @@ public class SleepController {
 
     private final SleepService sleepService;
 
+    @Resource
+    private UserServerFeign userServerFeign;
+
     public SleepController(SleepService sleepService) {
         this.sleepService = sleepService;
     }
@@ -25,5 +28,10 @@ public class SleepController {
     @PutMapping
     public JsonResult<Long> create(@RequestBody SleepCreateVO vo) {
         return sleepService.create(vo);
+    }
+
+    @GetMapping
+    public JsonResult<String> test(int a) {
+        return userServerFeign.degrade2(a);
     }
 }

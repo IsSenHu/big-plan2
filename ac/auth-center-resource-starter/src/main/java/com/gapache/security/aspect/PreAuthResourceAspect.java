@@ -2,7 +2,7 @@ package com.gapache.security.aspect;
 
 import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.cache.AuthResourceCache;
-import com.gapache.security.exception.SecurityException;
+import com.gapache.commons.model.SecurityException;
 import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.model.AccessCard;
 import com.gapache.security.model.SecurityError;
@@ -29,7 +29,6 @@ public class PreAuthResourceAspect {
         }
         // 校验权限
         String fullScope = AuthResourceCache.checkFullScope(authResource);
-        log.info("full scope:{}", fullScope);
         if (!accessCard.getAuthorities().contains(fullScope)) {
             throw new SecurityException(SecurityError.FORBIDDEN);
         }

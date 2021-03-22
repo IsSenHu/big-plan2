@@ -64,11 +64,7 @@ public class AuthResourceServerAutoConfiguration implements InitializingBean {
     @EventListener(ApplicationReadyEvent.class)
     public void listening(ApplicationReadyEvent readyEvent) {
         log.info("AuthResourceServerAutoConfiguration listening event:{}", readyEvent);
-        Boolean updateResources = securityProperties.getUpdateResources();
-        if (!updateResources) {
-            log.info("$$------AuthResource------not update resources");
-            return;
-        }
+
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -109,6 +105,12 @@ public class AuthResourceServerAutoConfiguration implements InitializingBean {
                 aClass = aClass.getSuperclass();
             }
         });
+
+        Boolean updateResources = securityProperties.getUpdateResources();
+        if (!updateResources) {
+            log.info("$$------AuthResource------not update resources");
+            return;
+        }
 
         // ResourceReporter
         ResourceReporter reporter = readyEvent.getApplicationContext().getBean(ResourceReporter.class);

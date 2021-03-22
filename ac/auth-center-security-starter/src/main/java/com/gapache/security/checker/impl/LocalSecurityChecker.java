@@ -1,16 +1,13 @@
 package com.gapache.security.checker.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.gapache.security.checker.AsyncSecurityChecker;
 import com.gapache.security.checker.SecurityChecker;
-import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.model.AccessCard;
-import com.gapache.security.model.AuthorizeInfoDTO;
-import com.gapache.security.model.impl.CertificationImpl;
-import com.gapache.security.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.security.PublicKey;
-import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author HuSen
@@ -19,38 +16,33 @@ import java.util.HashSet;
 @Slf4j
 public class LocalSecurityChecker implements SecurityChecker {
 
-    private final PublicKey publicKey;
-    private final AuthorizeInfoManager authorizeInfoManager;
+    private final AsyncSecurityChecker asyncSecurityChecker;
 
-    public LocalSecurityChecker(PublicKey publicKey, AuthorizeInfoManager authorizeInfoManager) {
-        this.publicKey = publicKey;
-        this.authorizeInfoManager = authorizeInfoManager;
+    public LocalSecurityChecker(AsyncSecurityChecker asyncSecurityChecker) {
+        this.asyncSecurityChecker = asyncSecurityChecker;
     }
 
     @Override
     public AccessCard checking(String token) {
-        // 先解析并检查token
-        try {
-            String content = JwtUtils.parseToken(token, publicKey);
-            log.info("parse token result:{}", content);
-            CertificationImpl certification = JSON.parseObject(content, CertificationImpl.class);
-            Long uniqueId = certification.getUniqueId();
-            String name = certification.getName();
-            AccessCard accessCard = new AccessCard();
-            accessCard.setUserId(uniqueId);
-            accessCard.setUsername(name);
-            accessCard.setClientId(certification.getClientId());
-            accessCard.setSign(certification.getSign());
+        AtomicReference<AccessCard> accessCard = new AtomicReference<>();
+        AtomicBoolean wait = new AtomicBoolean(false);
+        asyncSecurityChecker.checking(token)
+                .onSuccess(card -> {
+                    wait.set(true);
+                    accessCard.set(card);
+                })
+                .onFailure(error -> {
+                    wait.set(true);
+                    log.error("checker AccessCard fail, token:{}.", token, error);
+                });
+        while (!wait.get()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException ignored) {
 
-            String info = authorizeInfoManager.get(token);
-            AuthorizeInfoDTO authorizeInfoDTO = JSON.parseObject(info, AuthorizeInfoDTO.class);
-
-            accessCard.setAuthorities(new HashSet<>(authorizeInfoDTO.getScopes()));
-            accessCard.setCustomerInfo(authorizeInfoDTO.getCustomerInfo());
-            return accessCard;
-        } catch (Exception e) {
-            log.error("check token error.", e);
+            }
         }
-        return null;
+
+        return accessCard.get();
     }
 }

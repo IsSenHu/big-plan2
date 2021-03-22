@@ -1,9 +1,9 @@
 spring:
   application:
-    name: HEALTH_SERVER
+    name: health-server
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://118.24.38.46:3306/health?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://159.75.109.113:3306/health?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
     username: root
     password: 521428Slyt!
   jpa:
@@ -14,7 +14,72 @@ spring:
     show-sql: true
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQL57Dialect
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 159.75.109.113:8848
+    sentinel:
+      transport:
+        port: 8718
+        dashboard: localhost:8080
+      datasource:
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-degrade-config.json
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: degrade
 server:
   port: 8093
   servlet:
     context-path: /health-server
+
+# 在Spring Cloud微服务架构中，大部分公司都是利用Open Feign进行服务间的调用，
+# 而比较简单的业务使用默认配置是不会有多大问题的，但是如果是业务比较复杂，服务要进行比较繁杂的业务计算，那后台很有可能会出现Read Timeout这个异常，因此定制化配置超时时间就有必要了。
+# https://www.cnblogs.com/kancy/p/13033021.html
+# 这里主要是进行重试策略以及开启fallback，client的选择
+feign:
+  sentinel:
+    # 默认关闭，这里我们开启
+    enabled: true
+  httpclient:
+    # 默认开启
+    enabled: true
+  okhttp:
+    # 默认关闭
+    enabled: false
+    # 如果配置了这个将会使用这个重试机制ribbon的重试机制将不生效
+  client:
+    config:
+      default:
+        connect-timeout: 3000
+        read-timeout: 3000
+#        retryer: feign.Retryer.Default
+## hystrix在ribbon的外层处理。
+#hystrix:
+#  command:
+#    default:
+#      execution:
+#        timeout:
+#          enabled: true
+#        isolation:
+#          thread:
+#            timeoutInMilliseconds: 60000
+## Ribbon在feign client的外层
+#ribbon:
+#  ConnectTimeout: 5000  #毫秒    连接超时时间
+#  ReadTimeout: 5000     #毫秒      逻辑处理超时时间
+#  OkToRetryOnAllOperations: true    # 是否对所有操作都进行重试
+#  MaxAutoRetries: 2 # 对当前实例的最大重试次数(请求服务超时2s则会再请求一次)
+#  MaxAutoRetriesNextServer: 1     # 切换实例的最大重试次数(如果还失败就切换下一台)
+## Ribbon超时重试次数（总的请求次数）：（MaxAutoRetries+1）*（MaxAutoRetriesNextServer + 1）
+
+# 日志配置
+logging:
+  level:
+    com:
+      gapache:
+        user:
+          sdk:
+            feign: debug

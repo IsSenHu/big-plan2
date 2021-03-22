@@ -9,6 +9,8 @@ import com.gapache.web.Check;
 import com.gapache.web.Validating;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author HuSen
  * @since 2021/1/25 1:12 下午
@@ -34,25 +36,30 @@ public class UserController {
 
     @PutMapping
     @AuthResource(scope = "update", name = "更新用户")
-    public JsonResult<UserVO> update(@RequestBody @Check UserVO vo) {
-        return null;
+    public JsonResult<Boolean> update(@RequestBody @Check UserVO vo) {
+        return JsonResult.of(userService.update(vo));
     }
 
     @DeleteMapping("/{id}")
     @AuthResource(scope = "delete", name = "删除用户")
     public JsonResult<Boolean> delete(@PathVariable Long id) {
-        return null;
+        return JsonResult.of(userService.delete(id));
     }
 
     @GetMapping("/{id}")
     @AuthResource(scope = "get", name = "根据ID查询用户")
-    public JsonResult<UserVO> get(@PathVariable Long id) {
-        return null;
+    public JsonResult<UserVO> get(@PathVariable Long id, @RequestParam(required = false) String clientId) {
+        return JsonResult.of(userService.get(id, clientId));
     }
 
     @GetMapping("/findByUsername/{username}")
     @AuthResource(scope = "findByUsername", name = "根据用户名查询用户")
     public JsonResult<UserVO> findByUsername(@PathVariable String username, @RequestParam(required = false) String clientId) {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         UserVO vo = userService.findByUsername(username, clientId);
         return JsonResult.of(vo);
     }

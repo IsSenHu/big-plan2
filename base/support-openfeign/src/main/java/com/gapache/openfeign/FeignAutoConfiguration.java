@@ -2,9 +2,12 @@ package com.gapache.openfeign;
 
 import com.gapache.commons.helper.AccessCardHeaderHolder;
 import com.gapache.commons.model.AuthConstants;
+import com.gapache.sentinel.ProtectingCaller;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -22,5 +25,11 @@ public class FeignAutoConfiguration implements RequestInterceptor {
         if (StringUtils.isNotBlank(header)) {
             requestTemplate.header(AuthConstants.ACCESS_CARD_HEADER, header);
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProtectingCaller protectingCaller() {
+        return new FeignProtectingCaller();
     }
 }

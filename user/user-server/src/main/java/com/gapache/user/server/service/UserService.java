@@ -13,4 +13,10 @@ public interface UserService {
     Boolean userIsExisted(Long id);
 
     UserVO findByUsername(String username, String clientId);
+
+    boolean delete(Long id);
+
+    UserVO get(Long id, String clientId);
+
+    boolean update(UserVO vo);
 }

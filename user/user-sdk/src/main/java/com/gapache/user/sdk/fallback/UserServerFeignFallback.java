@@ -27,6 +27,11 @@ public class UserServerFeignFallback implements UserServerFeign {
 
     @Override
     public JsonResult<UserVO> findByUsername(String username, String clientId) {
-        return JsonResult.of(SystemError.SERVER_EXCEPTION);
+        return JsonResult.of(SystemError.SERVER_DEGRADE);
+    }
+
+    @Override
+    public JsonResult<String> degrade2(int a) {
+        return JsonResult.of(SystemError.SERVER_DEGRADE);
     }
 }
