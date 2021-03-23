@@ -52,7 +52,7 @@
         <!-- grpc 版本 -->
         <grpc.version>1.26.0</grpc.version>
         <!-- spring-cloud 版本使用2020.0.1 -->
-        <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
+        <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
         <!--spring-cloud-alibaba 版本-->
         <spring-cloud-alibaba.version>2.2.5.RELEASE</spring-cloud-alibaba.version>
         <!-- guava 版本 -->

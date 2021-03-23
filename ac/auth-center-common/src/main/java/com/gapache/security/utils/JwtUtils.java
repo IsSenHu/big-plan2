@@ -24,7 +24,12 @@ public class JwtUtils {
     }
 
     public static String parseToken(String token, PublicKey publicKey) {
-        return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token)
-                .getBody().get(CONTENT, String.class);
+        try {
+            return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token)
+                    .getBody().get(CONTENT, String.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

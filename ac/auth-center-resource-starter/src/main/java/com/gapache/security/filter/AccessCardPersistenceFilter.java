@@ -5,6 +5,7 @@ import com.gapache.protobuf.utils.ProtocstuffUtils;
 import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.model.AccessCard;
 import com.gapache.commons.model.AuthConstants;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
@@ -54,6 +55,16 @@ public class AccessCardPersistenceFilter implements Filter {
 
         String encoded = request.getHeader(AuthConstants.ACCESS_CARD_HEADER);
         if (StringUtils.isBlank(encoded)) {
+            // 在ACCESS_CARD_HEADER为空的情况下，判断请求来源
+            String from = request.getHeader(AuthConstants.X_FROM_HEADER);
+            if (StringUtils.isNotBlank(from)) {
+                AccessCard accessCard = new AccessCard();
+                accessCard.setUsername(from);
+                accessCard.setUserId(0L);
+                accessCard.setAuthorities(Sets.newHashSet());
+                accessCard.setClientId(from);
+                setCurrent(accessCard);
+            }
             chain.doFilter(request, response);
             return;
         }

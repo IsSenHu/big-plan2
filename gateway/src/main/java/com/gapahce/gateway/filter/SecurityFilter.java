@@ -51,20 +51,22 @@ public class SecurityFilter implements GlobalFilter, Ordered {
 
         return Mono.create(ms -> asyncSecurityChecker.checking(token)
                 .onSuccess(accessCard -> {
-                    byte[] message = ProtocstuffUtils.bean2Byte(accessCard, AccessCard.class);
-                    if (message != null) {
-                        String value = Base64Utils.encodeToString(message);
-                        log.info("{} :{}", AuthConstants.ACCESS_CARD_HEADER, value);
-                        exchange.getRequest().mutate()
-                                .headers(httpHeaders -> httpHeaders.add(AuthConstants.ACCESS_CARD_HEADER, value));
-                    }
-                    // 如果解析出了access card，就进行签名验证
-                    // 不必担心请求不传token的情况，因为需要签名验证的接口，一定是需要access card的，所以不传也会被资源服务器自己所拦截
-                    if (accessCard.getSign()) {
-                        String body = resolveBodyFromRequest(exchange.getRequest());
-                        if (StringUtils.isNotBlank(body)) {
-                            if (!signChecker.checkSign(JSON.parseObject(body), accessCard.getClientId())) {
-                                ms.error(new IllegalAccessError("sign error"));
+                    if (accessCard != null) {
+                        byte[] message = ProtocstuffUtils.bean2Byte(accessCard, AccessCard.class);
+                        if (message != null) {
+                            String value = Base64Utils.encodeToString(message);
+                            log.info("{} :{}", AuthConstants.ACCESS_CARD_HEADER, value);
+                            exchange.getRequest().mutate()
+                                    .headers(httpHeaders -> httpHeaders.add(AuthConstants.ACCESS_CARD_HEADER, value));
+                        }
+                        // 如果解析出了access card，就进行签名验证
+                        // 不必担心请求不传token的情况，因为需要签名验证的接口，一定是需要access card的，所以不传也会被资源服务器自己所拦截
+                        if (accessCard.getSign()) {
+                            String body = resolveBodyFromRequest(exchange.getRequest());
+                            if (StringUtils.isNotBlank(body)) {
+                                if (!signChecker.checkSign(JSON.parseObject(body), accessCard.getClientId())) {
+                                    ms.error(new IllegalAccessError("sign error"));
+                                }
                             }
                         }
                     }
@@ -72,7 +74,6 @@ public class SecurityFilter implements GlobalFilter, Ordered {
                     chain.filter(exchange)
                             .doFinally(t -> ms.success())
                             .subscribe(ms::success);
-
                 })
                 .onFailure(error -> {
                     log.error(">>>>>>", error);

@@ -37,6 +37,10 @@ public class LocalAsyncSecurityChecker implements AsyncSecurityChecker {
             try {
                 String content = JwtUtils.parseToken(token, publicKey);
                 log.info("parse token result:{}", content);
+                if (content == null) {
+                    event.complete(null);
+                    return;
+                }
                 CertificationImpl certification = JSON.parseObject(content, CertificationImpl.class);
                 Long uniqueId = certification.getUniqueId();
                 String name = certification.getName();
