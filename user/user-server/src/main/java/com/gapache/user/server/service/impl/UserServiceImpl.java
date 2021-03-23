@@ -3,7 +3,9 @@ package com.gapache.user.server.service.impl;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
+import com.gapache.jpa.FindUtils;
 import com.gapache.jpa.PageHelper;
+import com.gapache.jpa.SpecificationFactory;
 import com.gapache.user.common.model.UserError;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
@@ -114,7 +116,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageResult<UserVO> page(IPageRequest<UserVO> iPageRequest) {
         Pageable pageable = PageHelper.of(iPageRequest);
-        Page<UserEntity> page = userRepository.findAll(pageable);
+        UserVO params = iPageRequest.getCustomParams();
+        Page<UserEntity> page = userRepository.findAll(SpecificationFactory.produce((predicates, root, criteriaBuilder) -> {
+            if (params != null) {
+                if (StringUtils.isNotBlank(params.getUsername())) {
+                    predicates.add(criteriaBuilder.like(root.get("username").as(String.class), FindUtils.allMatch(params.getUsername())));
+                }
+            }
+        }), pageable);
         return PageResult.of(page.getTotalElements(), this::entity2Vo, page.getContent());
     }
 
