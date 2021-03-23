@@ -141,31 +141,7 @@ public class UserServiceImpl implements UserService {
     public UserInfoDTO login(UserLoginDTO dto) {
         String username = DynamicPropertyUtils.getString("admin.username");
         if (StringUtils.equals(username, dto.getUsername())) {
-            String password = DynamicPropertyUtils.getString("admin.password");
-            String introduction = DynamicPropertyUtils.getString("admin.introduction");
-            String avatar = DynamicPropertyUtils.getString("admin.avatar");
-
-            if (!StringUtils.equals(password, dto.getPassword())) {
-                throw new SecurityException(SecurityError.LOGIN_FAIL);
-            }
-
-            CertificationImpl certification = new CertificationImpl();
-            certification.setId(0L);
-            certification.setName(dto.getUsername());
-            certification.setSign(false);
-            certification.setClientId(dto.getClientId());
-            String content = JSON.toJSONString(certification);
-            String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
-
-            UserInfoDTO userInfoDTO = new UserInfoDTO();
-            userInfoDTO.setToken(token);
-            userInfoDTO.setName(dto.getUsername());
-            userInfoDTO.setAvatar(avatar);
-            userInfoDTO.setIntroduction(introduction);
-            userInfoDTO.setRoles(resourceRepository.findAll().stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
-
-            authorizeInfoManager.save(token, securityProperties.getTimeout(), new CustomerInfo(), userInfoDTO.getRoles());
-            return userInfoDTO;
+            return loginWithAdmin(dto);
         } else {
             JsonResult<UserVO> result = userServerFeign.findByUsername(dto.getUsername(), dto.getClientId());
             if (!result.requestSuccess()) {
@@ -181,14 +157,16 @@ public class UserServiceImpl implements UserService {
             }
 
             // 校验client和user的关系是否正确
-            ClientEntity clientEntity = clientRepository.findByClientId(dto.getClientId());
-            if (clientEntity == null) {
-                throw new SecurityException(SecurityError.LOGIN_FAIL);
-            }
+            if (StringUtils.isNotBlank(dto.getClientId())) {
+                ClientEntity clientEntity = clientRepository.findByClientId(dto.getClientId());
+                if (clientEntity == null) {
+                    throw new SecurityException(SecurityError.LOGIN_FAIL);
+                }
 
-            Boolean existsByUserIdAndClientId = userClientRelationRepository.existsByUserIdAndClientId(userEntity.getId(), clientEntity.getId());
-            if (!existsByUserIdAndClientId) {
-                throw new SecurityException(SecurityError.LOGIN_FAIL);
+                Boolean existsByUserIdAndClientId = userClientRelationRepository.existsByUserIdAndClientId(userEntity.getId(), clientEntity.getId());
+                if (!existsByUserIdAndClientId) {
+                    throw new SecurityException(SecurityError.LOGIN_FAIL);
+                }
             }
 
             CertificationImpl certification = new CertificationImpl();
@@ -201,7 +179,8 @@ public class UserServiceImpl implements UserService {
             String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
 
             String customizeInfo = userEntity.getCustomizeInfo();
-            JSONObject jsonObject = JSON.parseObject(customizeInfo);
+            JSONObject jsonObject = StringUtils.isNotBlank(customizeInfo) ?
+                    JSON.parseObject(customizeInfo) : new JSONObject();
 
             UserInfoDTO userInfoDTO = new UserInfoDTO();
             userInfoDTO.setToken(token);
@@ -221,6 +200,34 @@ public class UserServiceImpl implements UserService {
             authorizeInfoManager.save(token, securityProperties.getTimeout(), JSON.parseObject(customizeInfo, CustomerInfo.class), userInfoDTO.getRoles());
             return userInfoDTO;
         }
+    }
+
+    private UserInfoDTO loginWithAdmin(UserLoginDTO dto) {
+        String password = DynamicPropertyUtils.getString("admin.password");
+        String introduction = DynamicPropertyUtils.getString("admin.introduction");
+        String avatar = DynamicPropertyUtils.getString("admin.avatar");
+
+        if (!StringUtils.equals(password, dto.getPassword())) {
+            throw new SecurityException(SecurityError.LOGIN_FAIL);
+        }
+
+        CertificationImpl certification = new CertificationImpl();
+        certification.setId(0L);
+        certification.setName(dto.getUsername());
+        certification.setSign(false);
+        certification.setClientId(dto.getClientId());
+        String content = JSON.toJSONString(certification);
+        String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
+
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setToken(token);
+        userInfoDTO.setName(dto.getUsername());
+        userInfoDTO.setAvatar(avatar);
+        userInfoDTO.setIntroduction(introduction);
+        userInfoDTO.setRoles(resourceRepository.findAll().stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
+
+        authorizeInfoManager.save(token, securityProperties.getTimeout(), new CustomerInfo(), userInfoDTO.getRoles());
+        return userInfoDTO;
     }
 
     @Override

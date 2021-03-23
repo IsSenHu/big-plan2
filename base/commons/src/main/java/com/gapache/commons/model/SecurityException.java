@@ -1,6 +1,5 @@
 package com.gapache.commons.model;
 
-import com.gapache.commons.model.Error;
 import lombok.Getter;
 
 /**
@@ -14,7 +13,7 @@ public class SecurityException extends RuntimeException {
     private final Error error;
 
     public SecurityException(Error error) {
-        super(error.getError(), null, false, false);
+        super(error.getError());
         this.error = error;
     }
 }
