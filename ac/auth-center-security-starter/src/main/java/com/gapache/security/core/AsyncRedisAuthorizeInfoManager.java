@@ -32,7 +32,7 @@ public class AsyncRedisAuthorizeInfoManager implements AsyncAuthorizeInfoManager
         entity.setId(token);
         entity.setScopes(CollectionUtils.isNotEmpty(scopes) ? String.join(",", scopes) : "");
         entity.setCustomerInfo(JSON.toJSONString(customerInfo));
-        return Future.future(event -> simpleRedisRepository.save(entity)
+        return Future.future(event -> simpleRedisRepository.save(entity, timeout)
                 .onSuccess(response -> {
                     if (SuccessType.SET_OK.success(response)) {
                         event.complete();

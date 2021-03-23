@@ -24,7 +24,7 @@ public class Test {
         cat.setName("Tom");
         cat.setAge(7);
 
-        repository.save(cat)
+        repository.save(cat, 60)
                 .onSuccess(res -> repository.findById(cat.getId(), Cat.class).onSuccess(r -> {
                     for (int i = 0; i < 10; i++) {
                         IPageRequest<Cat> iPageRequest = new IPageRequest<>();

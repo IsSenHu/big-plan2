@@ -43,6 +43,10 @@ public class SimpleRedisRepository {
     }
 
     public Future<Response> save(Object entity) {
+        return save(entity, 0);
+    }
+
+    public Future<Response> save(Object entity, long timeout) {
         Assert.notNull(entity, "entity must not null!");
         RedisEntityDescriptor descriptor = DescriptorUtils.getDescriptor(entity.getClass());
 
@@ -61,11 +65,11 @@ public class SimpleRedisRepository {
                 redis.send(request)
                         .onSuccess(res -> {
                             shaCache.put("save", res.toString());
-                            doSave(event, res.toString(), descriptor, entity);
+                            doSave(event, res.toString(), descriptor, entity, timeout);
                         })
                         .onFailure(event::fail);
             } else {
-                doSave(event, sha, descriptor, entity);
+                doSave(event, sha, descriptor, entity, timeout);
             }
         });
     }
@@ -229,7 +233,7 @@ public class SimpleRedisRepository {
         }
     }
 
-    private void doSave(Promise<Response> event, String sha, RedisEntityDescriptor descriptor, Object entity) {
+    private void doSave(Promise<Response> event, String sha, RedisEntityDescriptor descriptor, Object entity, long timeout) {
         Request newRequest = new RequestImpl(Command.EVALSHA);
         newRequest.arg(sha);
 
@@ -260,7 +264,8 @@ public class SimpleRedisRepository {
 
         newRequest.arg(descriptor.getKey())
                 .arg(System.currentTimeMillis())
-                .arg(descriptor.getId(entity).toString());
+                .arg(descriptor.getId(entity).toString())
+                .arg(timeout);
 
         redis.send(newRequest).onSuccess(event::complete).onFailure(event::fail);
     }

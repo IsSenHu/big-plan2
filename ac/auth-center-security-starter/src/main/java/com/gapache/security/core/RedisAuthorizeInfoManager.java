@@ -25,7 +25,7 @@ public class RedisAuthorizeInfoManager implements AuthorizeInfoManager {
     @Override
     public void save(String token, Long timeout, CustomerInfo customerInfo, Collection<String> scopes) {
         AtomicBoolean wait = new AtomicBoolean(false);
-        asyncAuthorizeInfoManager.save(token, timeout, customerInfo, scopes)
+        asyncAuthorizeInfoManager.save(token, TimeUnit.SECONDS.convert(timeout, TimeUnit.MILLISECONDS), customerInfo, scopes)
                 .onComplete(as -> {
                     wait.compareAndSet(false, true);
                     if (!as.succeeded()) {

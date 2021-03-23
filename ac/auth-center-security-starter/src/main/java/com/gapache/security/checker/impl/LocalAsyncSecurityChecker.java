@@ -2,11 +2,8 @@ package com.gapache.security.checker.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.gapache.security.checker.AsyncSecurityChecker;
-import com.gapache.security.checker.SecurityChecker;
 import com.gapache.security.interfaces.AsyncAuthorizeInfoManager;
-import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.model.AccessCard;
-import com.gapache.security.model.AuthorizeInfoDTO;
 import com.gapache.security.model.impl.CertificationImpl;
 import com.gapache.security.utils.JwtUtils;
 import io.vertx.core.Future;
