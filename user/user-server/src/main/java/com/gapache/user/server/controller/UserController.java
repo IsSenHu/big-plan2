@@ -1,6 +1,8 @@
 package com.gapache.user.server.controller;
 
+import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.JsonResult;
+import com.gapache.commons.model.PageResult;
 import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.annotation.NeedAuth;
 import com.gapache.user.common.model.vo.UserVO;
@@ -62,5 +64,12 @@ public class UserController {
     public JsonResult<Boolean> userIsExisted(@PathVariable Long id) {
         Boolean isExisted = userService.userIsExisted(id);
         return JsonResult.of(isExisted);
+    }
+
+    @PostMapping("/page")
+    @AuthResource(scope = "page", name = "分页查询用户")
+    public JsonResult<PageResult<UserVO>> page(@RequestBody IPageRequest<UserVO> iPageRequest) {
+        PageResult<UserVO> pageResult = userService.page(iPageRequest);
+        return JsonResult.of(pageResult);
     }
 }

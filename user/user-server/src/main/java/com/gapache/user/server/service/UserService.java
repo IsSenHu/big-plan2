@@ -1,5 +1,7 @@
 package com.gapache.user.server.service;
 
+import com.gapache.commons.model.IPageRequest;
+import com.gapache.commons.model.PageResult;
 import com.gapache.user.common.model.vo.UserVO;
 
 /**
@@ -19,4 +21,6 @@ public interface UserService {
     UserVO get(Long id, String clientId);
 
     boolean update(UserVO vo);
+
+    PageResult<UserVO> page(IPageRequest<UserVO> iPageRequest);
 }

@@ -1,6 +1,9 @@
 package com.gapache.user.server.service.impl;
 
+import com.gapache.commons.model.IPageRequest;
+import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
+import com.gapache.jpa.PageHelper;
 import com.gapache.user.common.model.UserError;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
@@ -9,6 +12,8 @@ import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
 import com.gapache.user.server.dao.repository.UserRepository;
 import com.gapache.user.server.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,18 +112,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public PageResult<UserVO> page(IPageRequest<UserVO> iPageRequest) {
+        Pageable pageable = PageHelper.of(iPageRequest);
+        Page<UserEntity> page = userRepository.findAll(pageable);
+        return PageResult.of(page.getTotalElements(), this::entity2Vo, page.getContent());
+    }
+
+    @Override
     public UserVO get(Long id, String clientId) {
         Optional<UserEntity> optional = userRepository.findById(id);
         ThrowUtils.throwIfTrue(!optional.isPresent(), UserError.USER_NOT_FOUND);
 
         UserEntity userEntity = optional.get();
-        UserVO vo = new UserVO();
-        vo.setId(userEntity.getId());
-        vo.setUsername(userEntity.getUsername());
-        vo.setCreateTime(userEntity.getCreateTime());
-        vo.setLastModifiedTime(userEntity.getLastModifiedTime());
-        vo.setCreateBy(userEntity.getCreateBy());
-        vo.setLastModifiedBy(userEntity.getLastModifiedBy());
+        UserVO vo = entity2Vo(userEntity);
 
         if (StringUtils.isNotBlank(clientId)) {
             UserCustomizeInfoEntity customizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(userEntity.getId(), clientId);
@@ -126,6 +132,17 @@ public class UserServiceImpl implements UserService {
                 vo.setCustomizeInfo(customizeInfoEntity.getInfo());
             }
         }
+        return vo;
+    }
+
+    private UserVO entity2Vo(UserEntity userEntity) {
+        UserVO vo = new UserVO();
+        vo.setId(userEntity.getId());
+        vo.setUsername(userEntity.getUsername());
+        vo.setCreateTime(userEntity.getCreateTime());
+        vo.setLastModifiedTime(userEntity.getLastModifiedTime());
+        vo.setCreateBy(userEntity.getCreateBy());
+        vo.setLastModifiedBy(userEntity.getLastModifiedBy());
         return vo;
     }
 }
