@@ -28,7 +28,7 @@ public class PreAuthResourceAspect {
             throw new SecurityException(SecurityError.FORBIDDEN);
         }
         // 0表示来自任意内部调用
-        if (accessCard.getUserId() == 0) {
+        if (accessCard.getUserId() != null && accessCard.getUserId() == 0) {
             return;
         }
         // 校验权限
