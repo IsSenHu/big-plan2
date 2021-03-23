@@ -64,6 +64,7 @@ public class AccessCardPersistenceFilter implements Filter {
                 accessCard.setAuthorities(Sets.newHashSet());
                 accessCard.setClientId(from);
                 setCurrent(accessCard);
+                AccessCardHolder.setContext(accessCard);
             }
             chain.doFilter(request, response);
             return;
