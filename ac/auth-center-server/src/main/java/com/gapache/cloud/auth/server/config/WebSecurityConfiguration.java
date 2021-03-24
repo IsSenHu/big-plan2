@@ -1,35 +1,48 @@
 package com.gapache.cloud.auth.server.config;
 
+import com.gapache.cloud.auth.server.model.UserDetailsImpl;
 import com.gapache.cloud.auth.server.security.GenerateRefreshTokenStrategy;
-import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.cloud.auth.server.security.impl.JwtGenerateTokenStrategy;
 import com.gapache.cloud.auth.server.security.impl.UUIDGenerateRefreshTokenStrategy;
+import com.gapache.security.holder.AccessCardHolder;
+import com.gapache.security.interfaces.GenerateTokenStrategy;
+import com.gapache.security.model.AccessCard;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Resource;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.security.PrivateKey;
+import java.util.stream.Collectors;
 
 /**
  * 前后端分离的情况下有的数据可以让别人看无需加密
  * 前端做的加密其实都是不安全的
  * 特殊业务用上特殊的进行特殊的验证来解决，如进行手机短信验证等
- *
+ * <p>
  * 开放的接口需要进行签名校验
  * 加密由https来做（防止中间人攻击）
  * 由请求方生成公钥和私钥，请求方使用私钥进行签名，我们使用公钥进行验签
@@ -57,6 +70,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public BeforeUsernamePasswordAuthenticationFilter beforeUsernamePasswordAuthenticationFilter() {
+        return new BeforeUsernamePasswordAuthenticationFilter();
     }
 
     @Bean
@@ -88,10 +106,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.headers().cacheControl();
 
         http.authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/auth/login").permitAll()
-                .antMatchers(HttpMethod.POST,"/auth/logout").permitAll()
-                .antMatchers(HttpMethod.POST,"/api/user").permitAll()
-                .antMatchers(HttpMethod.POST,"/api/client").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/logout").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/user").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/client").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/client/bindUser").permitAll()
                 .antMatchers(HttpMethod.POST, "/oauth/token").permitAll()
                 .antMatchers(HttpMethod.POST, "/oauth/check").permitAll()
@@ -104,6 +122,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .loginPage(LOGIN)
                 .and()
                 .logout().logoutUrl(LOGOUT).logoutSuccessUrl(LOGIN).permitAll();
+
+        http.addFilterBefore(beforeUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     private static final String CSS = "/css/**";
@@ -121,5 +141,24 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         // 不去拦截这些静态资源
         web.ignoring().antMatchers(IMAGES, LIB, CSS, FONTS, JS, ELE_TREE, FAVICON, EXCEL, LAY_EXT, LAY);
+    }
+
+    static class BeforeUsernamePasswordAuthenticationFilter extends OncePerRequestFilter {
+
+        @Override
+        protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+            AccessCard accessCard = AccessCardHolder.getContext();
+            UserDetailsImpl userDetails = new UserDetailsImpl(
+                    accessCard.getUserId(),
+                    accessCard.getUsername(),
+                    null,
+                    accessCard.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
+                    accessCard.getCustomerInfo(),
+                    accessCard.getClientId()
+            );
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
     }
 }

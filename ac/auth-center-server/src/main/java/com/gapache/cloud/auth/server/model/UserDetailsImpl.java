@@ -1,6 +1,8 @@
 package com.gapache.cloud.auth.server.model;
 
 import com.gapache.security.model.CustomerInfo;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +17,8 @@ import java.util.List;
  */
 @Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = -7492932138645849421L;
     /**

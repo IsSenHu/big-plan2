@@ -33,7 +33,7 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQL57Dialect
   redis:
-    host: 159.75.109.113
+    host: localhost
     port: 6379
   thymeleaf:
     prefix: classpath:/templates/

@@ -45,5 +45,5 @@ com:
     security:
       client-id: user123456user
       register-remote: true
-      update-resources: false
+      update-resources: true
 
