@@ -34,4 +34,9 @@ public class UserServerFeignFallback implements UserServerFeign {
     public JsonResult<String> degrade2(int a) {
         return JsonResult.of(SystemError.SERVER_DEGRADE);
     }
+
+    @Override
+    public JsonResult<Object> findValue(Long userId, String clientId, String key) {
+        return JsonResult.of(SystemError.SERVER_DEGRADE);
+    }
 }

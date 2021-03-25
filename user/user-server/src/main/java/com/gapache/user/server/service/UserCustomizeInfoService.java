@@ -15,4 +15,6 @@ public interface UserCustomizeInfoService {
     boolean delete(Long id);
 
     UserCustomizeInfoVO get(Long id);
+
+    Object findValue(Long userId, String clientId, String key);
 }

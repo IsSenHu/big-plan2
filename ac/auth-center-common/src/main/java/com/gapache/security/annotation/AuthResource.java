@@ -25,4 +25,11 @@ public @interface AuthResource {
      * @return 资源名称
      */
     String name();
+
+    /**
+     * 资源是否检测用户可用不
+     *
+     * @return 是否检测用户可用不
+     */
+    boolean checkEnabled() default true;
 }

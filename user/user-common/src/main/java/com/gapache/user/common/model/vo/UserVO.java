@@ -1,5 +1,6 @@
 package com.gapache.user.common.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -44,11 +45,15 @@ public class UserVO implements Serializable {
      */
     private String customizeInfo;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime lastModifiedTime;
 
-    private String createBy;
+    private Long createBy;
 
-    private String lastModifiedBy;
+    private Long lastModifiedBy;
+
+    private Long roleId;
 }

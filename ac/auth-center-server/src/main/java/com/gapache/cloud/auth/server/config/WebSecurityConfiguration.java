@@ -7,8 +7,12 @@ import com.gapache.cloud.auth.server.security.impl.UUIDGenerateRefreshTokenStrat
 import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.security.model.AccessCard;
+import com.gapache.security.utils.AccessCardUtils;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -67,14 +72,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Qualifier("userService")
     private UserDetailsService userDetailsService;
 
+    @Resource
+    private BeforeUsernamePasswordAuthenticationFilter beforeUsernamePasswordAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public BeforeUsernamePasswordAuthenticationFilter beforeUsernamePasswordAuthenticationFilter() {
-        return new BeforeUsernamePasswordAuthenticationFilter();
     }
 
     @Bean
@@ -109,6 +112,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/auth/logout").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/user/isEnabled/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/client").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/client/bindUser").permitAll()
                 .antMatchers(HttpMethod.POST, "/oauth/token").permitAll()
@@ -118,12 +122,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .anyRequest().authenticated();
 
+        http.headers().cacheControl();
+
         http.formLogin()
                 .loginPage(LOGIN)
                 .and()
                 .logout().logoutUrl(LOGOUT).logoutSuccessUrl(LOGIN).permitAll();
 
-        http.addFilterBefore(beforeUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(beforeUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     private static final String CSS = "/css/**";
@@ -143,22 +149,30 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers(IMAGES, LIB, CSS, FONTS, JS, ELE_TREE, FAVICON, EXCEL, LAY_EXT, LAY);
     }
 
+    @Component
+    @Order(1)
     static class BeforeUsernamePasswordAuthenticationFilter extends OncePerRequestFilter {
 
         @Override
         protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+            AccessCardUtils.checkAccessCard(request);
+
             AccessCard accessCard = AccessCardHolder.getContext();
-            UserDetailsImpl userDetails = new UserDetailsImpl(
-                    accessCard.getUserId(),
-                    accessCard.getUsername(),
-                    null,
-                    accessCard.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
-                    accessCard.getCustomerInfo(),
-                    accessCard.getClientId()
-            );
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (accessCard.getUserId() != null) {
+                UserDetailsImpl userDetails = new UserDetailsImpl(
+                        accessCard.getUserId(),
+                        accessCard.getUsername(),
+                        "123456",
+                        CollectionUtils.isEmpty(accessCard.getAuthorities()) ? Lists.newArrayList() : accessCard.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
+                        accessCard.getCustomerInfo(),
+                        accessCard.getClientId()
+                );
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            filterChain.doFilter(request, response);
         }
     }
 }

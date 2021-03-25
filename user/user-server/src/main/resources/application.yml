@@ -7,6 +7,7 @@ spring:
     nacos:
       discovery:
         server-addr: 159.75.109.113:8848
+        group: DEFAULT_GROUP
     sentinel:
       transport:
         dashboard: localhost:8080
@@ -29,7 +30,7 @@ spring:
             rule-type: degrade
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://159.75.109.113:3306/user?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://localhost:3306/user?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
     username: root
     password: 521428Slyt!
   jpa:

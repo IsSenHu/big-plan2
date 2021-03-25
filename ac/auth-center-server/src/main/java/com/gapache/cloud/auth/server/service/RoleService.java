@@ -4,7 +4,10 @@ import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.security.model.RoleCreateDTO;
 import com.gapache.security.model.RoleDTO;
+import com.gapache.security.model.RolePermissionDTO;
 import com.gapache.security.model.RoleUpdateDTO;
+
+import java.util.List;
 
 /**
  * @author HuSen
@@ -19,4 +22,8 @@ public interface RoleService {
     Boolean delete(Long id);
 
     PageResult<RoleDTO> page(IPageRequest<RoleDTO> iPageRequest);
+
+    RolePermissionDTO findRoleAndPermissions(Long id);
+
+    List<RoleDTO> findAllByName(String name);
 }

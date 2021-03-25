@@ -2,6 +2,7 @@ package com.gapache.security.utils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -11,6 +12,7 @@ import java.util.Date;
  * @author HuSen
  * @since 2020/7/31 3:27 下午
  */
+@Slf4j
 public class JwtUtils {
 
     private static final String CONTENT = "content";
@@ -28,7 +30,7 @@ public class JwtUtils {
             return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token)
                     .getBody().get(CONTENT, String.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("parseToken error:{}", e.getMessage());
             return null;
         }
     }

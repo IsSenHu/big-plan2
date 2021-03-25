@@ -6,14 +6,14 @@ import lombok.Data;
 
 /**
  * @author HuSen
- * @since 2021/3/18 2:22 下午
+ * @since 2021/3/25 10:50 上午
  */
 @Data
-@RedisEntity("tb_authorize_info")
-public class AuthorizeInfoEntity {
+@RedisEntity("tb_id_token")
+public class IdTokenEntity {
 
     @Id
-    private String id;
-    private String scopes;
-    private String customerInfo;
+    private Long userId;
+
+    private String token;
 }

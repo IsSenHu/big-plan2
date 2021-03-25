@@ -8,10 +8,13 @@ import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.annotation.NeedAuth;
 import com.gapache.security.model.RoleCreateDTO;
 import com.gapache.security.model.RoleDTO;
+import com.gapache.security.model.RolePermissionDTO;
 import com.gapache.security.model.RoleUpdateDTO;
 import com.gapache.web.Check;
 import com.gapache.web.Validating;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author HuSen
@@ -51,5 +54,17 @@ public class RoleController {
     @AuthResource(scope = "page", name = "分页查询角色")
     public JsonResult<PageResult<RoleDTO>> page(@RequestBody IPageRequest<RoleDTO> iPageRequest) {
         return JsonResult.of(roleService.page(iPageRequest));
+    }
+
+    @GetMapping("/findRoleAndPermissions/{id}")
+    @AuthResource(scope = "findRoleAndPermissions", name = "分页查询角色并且带有权限")
+    public JsonResult<RolePermissionDTO> findRoleAndPermissions(@PathVariable Long id) {
+        return JsonResult.of(roleService.findRoleAndPermissions(id));
+    }
+
+    @GetMapping("/findAllByName")
+    @AuthResource(scope = "findAllByName", name = "根据名称查询角色")
+    public JsonResult<List<RoleDTO>> findAllByName(@RequestParam String name) {
+        return JsonResult.of(roleService.findAllByName(name));
     }
 }

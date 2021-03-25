@@ -66,7 +66,7 @@ public class AuthorizationCodeGenerateTokenLogic extends BaseGenerateTokenLogic 
 
         // 保存token对应的信息
         List<String> scopes = loadAuthorizedScope(clientId, codeCacheInfoDTO.getUserId(), opsForValue);
-        authorizeInfoManager.save(token, clientDetails.getTimeout(), codeCacheInfoDTO.getCustomerInfo(), scopes);
+        authorizeInfoManager.save(codeCacheInfoDTO.getUserId(), token, clientDetails.getTimeout(), codeCacheInfoDTO.getCustomerInfo(), scopes);
 
         TokenInfoDTO dto = new TokenInfoDTO();
         dto.setAccessToken(token);

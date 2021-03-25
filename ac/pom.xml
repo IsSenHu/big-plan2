@@ -9,6 +9,7 @@
         <module>auth-center-resource-starter</module>
         <module>auth-center-security-starter</module>
         <module>auth-center-server</module>
+        <module>auth-center-cluster</module>
     </modules>
 
     <parent>

@@ -75,6 +75,7 @@ public class WebAutoConfiguration {
                     } else if (name.equals(AuthorityException.class.getName())) {
                         jsonResult = JsonResult.of(SystemError.SERVER_AUTHORITY);
                     } else {
+                        log.error("{}.{}发生未知异常:", request.getMethod(), request.getRequestURI(), e);
                         jsonResult = JsonResult.of(SystemError.SERVER_EXCEPTION);
                     }
                 } else {

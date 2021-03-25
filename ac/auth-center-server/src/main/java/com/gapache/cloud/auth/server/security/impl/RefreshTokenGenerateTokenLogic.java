@@ -3,14 +3,14 @@ package com.gapache.cloud.auth.server.security.impl;
 import com.alibaba.fastjson.JSON;
 import com.gapache.cloud.auth.server.constant.GrantType;
 import com.gapache.cloud.auth.server.model.*;
-import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.cloud.auth.server.security.BaseGenerateTokenLogic;
 import com.gapache.cloud.auth.server.security.GenerateRefreshTokenStrategy;
-import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.cloud.auth.server.service.ClientService;
 import com.gapache.cloud.auth.server.service.UserClientRelationService;
 import com.gapache.cloud.auth.server.service.UserService;
 import com.gapache.commons.model.ThrowUtils;
+import com.gapache.security.interfaces.AuthorizeInfoManager;
+import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.security.model.SecurityError;
 import com.gapache.security.model.TokenInfoDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -74,7 +74,7 @@ public class RefreshTokenGenerateTokenLogic extends BaseGenerateTokenLogic {
         String token = generateTokenStrategy.generate(generateTokenParams);
 
         List<String> scopes = loadAuthorizedScope(clientId, userDetails.getId(), stringRedisTemplate.opsForValue());
-        authorizeInfoManager.save(token, clientDetails.getTimeout(), userDetails.getCustomerInfo(), scopes);
+        authorizeInfoManager.save(userDetails.getId(), token, clientDetails.getTimeout(), userDetails.getCustomerInfo(), scopes);
 
         TokenInfoDTO dto = new TokenInfoDTO();
         dto.setAccessToken(token);

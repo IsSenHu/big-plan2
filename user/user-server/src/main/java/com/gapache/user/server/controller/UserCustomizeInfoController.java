@@ -48,4 +48,10 @@ public class UserCustomizeInfoController {
     public JsonResult<UserCustomizeInfoVO> get(@PathVariable Long id) {
         return JsonResult.of(userCustomizeInfoService.get(id));
     }
+
+    @GetMapping("/findValue/{userId}/{key}")
+    @AuthResource(scope = "findValue", name = "根据用户Id和clientId查询单个值", checkEnabled = false)
+    public JsonResult<Object> findValue(@PathVariable Long userId, @RequestParam(required = false) String clientId, @PathVariable String key) {
+        return JsonResult.of(userCustomizeInfoService.findValue(userId, clientId, key));
+    }
 }

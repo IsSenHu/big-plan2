@@ -15,9 +15,13 @@ import com.gapache.cloud.auth.server.dao.repository.user.UserRoleRepository;
 import com.gapache.cloud.auth.server.model.UserDetailsImpl;
 import com.gapache.cloud.auth.server.service.UserService;
 import com.gapache.cloud.auth.server.utils.DynamicPropertyUtils;
+import com.gapache.commons.model.AuthConstants;
 import com.gapache.commons.model.JsonResult;
-import com.gapache.commons.model.ThrowUtils;
 import com.gapache.commons.model.SecurityException;
+import com.gapache.commons.model.ThrowUtils;
+import com.gapache.security.entity.AuthorizeInfoEntity;
+import com.gapache.security.entity.IdTokenEntity;
+import com.gapache.security.interfaces.AsyncAuthorizeInfoManager;
 import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.model.*;
 import com.gapache.security.model.impl.CertificationImpl;
@@ -25,7 +29,18 @@ import com.gapache.security.properties.SecurityProperties;
 import com.gapache.security.utils.JwtUtils;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.sdk.feign.UserServerFeign;
+import com.gapache.vertx.core.VertxCreatedEvent;
+import com.gapache.vertx.core.VertxManager;
+import com.gapache.vertx.redis.support.SimpleRedisRepository;
+import com.google.common.collect.Lists;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationListener;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,19 +52,23 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static com.gapache.commons.model.AuthConstants.IS_ENABLED;
 import static com.gapache.commons.model.AuthConstants.TOKEN_HEADER;
 
 /**
  * @author HuSen
  * @since 2020/7/31 10:19 上午
  */
+@Slf4j
 @Service("userService")
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, ApplicationListener<VertxCreatedEvent> {
 
     @Resource
     private UserRepository userRepository;
@@ -83,6 +102,67 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private AuthorizeInfoManager authorizeInfoManager;
+
+    @Resource
+    private SimpleRedisRepository simpleRedisRepository;
+
+    @Resource
+    private AsyncAuthorizeInfoManager asyncAuthorizeInfoManager;
+
+    private final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+    @Override
+    public void onApplicationEvent(@NonNull VertxCreatedEvent vertxCreatedEvent) {
+        if (vertxCreatedEvent.isSuccess()) {
+            if(atomicBoolean.compareAndSet(false, true)) {
+                Handler<Message<JsonObject>> authorizeInfoUpdater = event -> {
+                    log.info(">>>>>> 更新用户的授权相关信息:{}", event);
+                    JsonObject body = event.body();
+                    Long userId = body.getLong("userId");
+                    if (userId == null) {
+                        return;
+                    }
+
+                    simpleRedisRepository
+                            .findById(userId.toString(), IdTokenEntity.class)
+                            .onSuccess(idToken -> {
+                                if (idToken == null || idToken.getToken() == null) {
+                                    return;
+                                }
+
+                                simpleRedisRepository
+                                        .findById(idToken.getToken(), AuthorizeInfoEntity.class)
+                                        .onSuccess(authorizeInfoEntity -> {
+                                            if (authorizeInfoEntity == null || authorizeInfoEntity.getId() == null) {
+                                                return;
+                                            }
+
+                                            String authorizeInfo = body.getString("authorizeInfo");
+                                            AuthorizeInfoDTO authorizeInfoDTO = JSON.parseObject(authorizeInfo, AuthorizeInfoDTO.class);
+
+                                            CustomerInfo customerInfo = JSON.parseObject(authorizeInfoEntity.getCustomerInfo(), CustomerInfo.class);
+                                            // 挨个挨个替换
+                                            if (authorizeInfoDTO.getCustomerInfo() != null) {
+                                                authorizeInfoDTO.getCustomerInfo().forEach(customerInfo::put);
+                                            }
+
+                                            // 保存
+                                            asyncAuthorizeInfoManager.save(
+                                                    idToken.getToken(),
+                                                    0L,
+                                                    customerInfo,
+                                                    authorizeInfoDTO.getScopes() != null ?
+                                                            authorizeInfoDTO.getScopes() :
+                                                            Arrays.asList(authorizeInfoEntity.getScopes().split(",").clone())
+                                            );
+                                        });
+                            });
+                };
+                log.info("<<<<<<<<<<<<");
+                VertxManager.getVertx().eventBus().consumer(AuthConstants.EventBusAddress.UPDATE_AUTHORIZE_INFO_ADDRESS, authorizeInfoUpdater);
+            }
+        }
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -169,18 +249,22 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            CertificationImpl certification = new CertificationImpl();
-            certification.setId(userEntity.getId());
-            certification.setName(userEntity.getUsername());
-            certification.setSign(false);
-            certification.setClientId(dto.getClientId());
-
-            String content = JSON.toJSONString(certification);
-            String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
-
             String customizeInfo = userEntity.getCustomizeInfo();
             JSONObject jsonObject = StringUtils.isNotBlank(customizeInfo) ?
                     JSON.parseObject(customizeInfo) : new JSONObject();
+
+            if (jsonObject.containsKey(AuthConstants.IS_ENABLED)) {
+                if (!jsonObject.getBoolean(AuthConstants.IS_ENABLED)) {
+                    throw new SecurityException(SecurityError.USER_DISABLED);
+                }
+            }
+
+            UserRoleEntity userRoleEntity = userRoleRepository.findByUserId(userEntity.getId());
+            CertificationImpl certification = new CertificationImpl(userEntity.getId(),
+                    userRoleEntity != null ? userRoleEntity.getRoleId() : null, userEntity.getUsername(), dto.getClientId(), false);
+
+            String content = JSON.toJSONString(certification);
+            String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
 
             UserInfoDTO userInfoDTO = new UserInfoDTO();
             userInfoDTO.setToken(token);
@@ -190,14 +274,15 @@ public class UserServiceImpl implements UserService {
             userInfoDTO.setIntroduction(jsonObject.getString("introduction"));
             // 设置角色
             List<ResourceEntity> allResource = resourceRepository.findAllResource(userEntity.getId());
-            if (allResource == null) {
-                throw new SecurityException(SecurityError.LOGIN_FAIL);
+            if (CollectionUtils.isNotEmpty(allResource)) {
+                userInfoDTO.setRoles(allResource.stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
+            } else {
+                userInfoDTO.setRoles(Lists.newArrayList("123456"));
             }
-            userInfoDTO.setRoles(allResource.stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
             // 设置头像
             userInfoDTO.setAvatar(jsonObject.containsKey("avatar") ? jsonObject.getString("avatar") : "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-
-            authorizeInfoManager.save(token, securityProperties.getTimeout(), JSON.parseObject(customizeInfo, CustomerInfo.class), userInfoDTO.getRoles());
+            userInfoDTO.setId(userEntity.getId());
+            authorizeInfoManager.save(userEntity.getId(), token, securityProperties.getTimeout(), JSON.parseObject(customizeInfo, CustomerInfo.class), Lists.newArrayList());
             return userInfoDTO;
         }
     }
@@ -211,11 +296,7 @@ public class UserServiceImpl implements UserService {
             throw new SecurityException(SecurityError.LOGIN_FAIL);
         }
 
-        CertificationImpl certification = new CertificationImpl();
-        certification.setId(0L);
-        certification.setName(dto.getUsername());
-        certification.setSign(false);
-        certification.setClientId(dto.getClientId());
+        CertificationImpl certification = new CertificationImpl(0L, null, dto.getUsername(), dto.getClientId(), false);
         String content = JSON.toJSONString(certification);
         String token = JwtUtils.generateToken(content, privateKey, securityProperties.getTimeout());
 
@@ -225,8 +306,11 @@ public class UserServiceImpl implements UserService {
         userInfoDTO.setAvatar(avatar);
         userInfoDTO.setIntroduction(introduction);
         userInfoDTO.setRoles(resourceRepository.findAll().stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
-
-        authorizeInfoManager.save(token, securityProperties.getTimeout(), new CustomerInfo(), userInfoDTO.getRoles());
+        if (CollectionUtils.isEmpty(userInfoDTO.getRoles())) {
+            userInfoDTO.getRoles().add("123456");
+        }
+        userInfoDTO.setId(0L);
+        authorizeInfoManager.save(userInfoDTO.getId(), token, securityProperties.getTimeout(), new CustomerInfo(), userInfoDTO.getRoles());
         return userInfoDTO;
     }
 
@@ -241,7 +325,20 @@ public class UserServiceImpl implements UserService {
     public Boolean create(UserVO vo) {
         // 密码加密
         vo.setPassword(passwordEncoder.encode(vo.getPassword()));
+        if (StringUtils.isBlank(vo.getClient())) {
+            vo.setClient(AuthConstants.VEA);
+        }
         JsonResult<UserVO> result = userServerFeign.create(vo);
+
+        if (result.requestSuccess()) {
+            if (vo.getRoleId() != null) {
+                SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
+                setUserRoleDTO.setUserId(result.getData().getId());
+                setUserRoleDTO.setRoleId(vo.getRoleId());
+                setUserRole(setUserRoleDTO);
+            }
+        }
+
         return result.requestSuccess();
     }
 
@@ -278,5 +375,20 @@ public class UserServiceImpl implements UserService {
 
         userRoleRepository.save(entity);
         return true;
+    }
+
+    @Override
+    public Long findUserRoleId(Long userId) {
+        UserRoleEntity userRoleEntity = userRoleRepository.findByUserId(userId);
+        return userRoleEntity == null ? null : userRoleEntity.getRoleId();
+    }
+
+    @Override
+    public Boolean isEnabled(Long userId) {
+        if (userId == 0) {
+            return true;
+        }
+        JsonResult<Object> value = userServerFeign.findValue(userId, AuthConstants.VEA, IS_ENABLED);
+        return value.getData() != null ? (Boolean) value.getData() : true;
     }
 }

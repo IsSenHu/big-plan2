@@ -43,7 +43,7 @@ public class ClientCredentialsGenerateTokenLogic extends BaseGenerateTokenLogic 
         Map<String, Object> generateTokenParams = buildGenerateTokenParams(clientDetails.getTimeout(), clientId, clientDetails.getId(), clientId, StringUtils.isNotBlank(clientDetails.getPrivateKey()));
         String token = generateTokenStrategy.generate(generateTokenParams);
         Set<String> scopes = clientDetails.getScopes();
-        authorizeInfoManager.save(token, clientDetails.getTimeout(), null, scopes);
+        authorizeInfoManager.save(-1L, token, clientDetails.getTimeout(), null, scopes);
 
         TokenInfoDTO dto = new TokenInfoDTO();
         dto.setAccessToken(token);

@@ -24,4 +24,7 @@ public interface UserServerFeign {
 
     @GetMapping("/test/degrade2")
     JsonResult<String> degrade2(@RequestParam int a);
+
+    @GetMapping("/api/userCustomizeInfo/findValue/{userId}/{key}")
+    JsonResult<Object> findValue(@PathVariable Long userId, @RequestParam(required = false) String clientId, @PathVariable String key);
 }

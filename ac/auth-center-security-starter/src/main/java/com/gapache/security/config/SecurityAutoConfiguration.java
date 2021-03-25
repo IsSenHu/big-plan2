@@ -45,7 +45,7 @@ public class SecurityAutoConfiguration {
         log.info("启用公钥解密############AsyncSecurityChecker");
         return new LocalAsyncSecurityChecker(
                 RSAUtils.getPublicKey(securityProperties.getPublicKey().trim().replaceAll(" ", "")),
-                asyncAuthorizeInfoManager(simpleRedisRepository));
+                asyncAuthorizeInfoManager(simpleRedisRepository), simpleRedisRepository);
     }
 
     @Bean("localSecurityChecker")
@@ -72,6 +72,6 @@ public class SecurityAutoConfiguration {
 
     @Bean
     public AuthorizeInfoManager authorizeInfoManager(SimpleRedisRepository simpleRedisRepository) {
-        return new RedisAuthorizeInfoManager(asyncAuthorizeInfoManager(simpleRedisRepository));
+        return new RedisAuthorizeInfoManager(asyncAuthorizeInfoManager(simpleRedisRepository), simpleRedisRepository);
     }
 }

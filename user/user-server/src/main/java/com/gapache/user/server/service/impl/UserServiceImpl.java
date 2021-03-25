@@ -1,11 +1,13 @@
 package com.gapache.user.server.service.impl;
 
+import com.gapache.commons.model.AuthConstants;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
 import com.gapache.jpa.FindUtils;
 import com.gapache.jpa.PageHelper;
 import com.gapache.jpa.SpecificationFactory;
+import com.gapache.security.event.EventSender;
 import com.gapache.user.common.model.UserError;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
@@ -13,13 +15,17 @@ import com.gapache.user.server.dao.entity.UserEntity;
 import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
 import com.gapache.user.server.dao.repository.UserRepository;
 import com.gapache.user.server.service.UserService;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author HuSen
@@ -30,10 +36,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserCustomizeInfoRepository userCustomizeInfoRepository;
+    private final EventSender eventSender;
 
-    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository, EventSender eventSender) {
         this.userRepository = userRepository;
         this.userCustomizeInfoRepository = userCustomizeInfoRepository;
+        this.eventSender = eventSender;
     }
 
     @Override
@@ -48,7 +56,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
 
         String customizeInfo = vo.getCustomizeInfo();
-        if (StringUtils.isNotBlank(customizeInfo)) {
+        if (StringUtils.isNotBlank(vo.getClient()) && StringUtils.isNotBlank(customizeInfo)) {
             UserCustomizeInfoEntity userCustomizeInfoEntity = new UserCustomizeInfoEntity();
             userCustomizeInfoEntity.setInfo(customizeInfo);
             userCustomizeInfoEntity.setClientId(vo.getClient());
@@ -82,12 +90,7 @@ public class UserServiceImpl implements UserService {
         vo.setLastModifiedBy(userEntity.getLastModifiedBy());
         vo.setLastModifiedTime(userEntity.getLastModifiedTime());
 
-        if (StringUtils.isNotBlank(clientId)) {
-            UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(vo.getId(), clientId);
-            if (userCustomizeInfoEntity != null) {
-                vo.setCustomizeInfo(userCustomizeInfoEntity.getInfo());
-            }
-        }
+        getCustomerInfo(clientId, userEntity, vo);
         return vo;
     }
 
@@ -108,6 +111,8 @@ public class UserServiceImpl implements UserService {
             UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(entity.getId(), vo.getClient());
             userCustomizeInfoEntity.setInfo(vo.getCustomizeInfo());
             userCustomizeInfoRepository.save(userCustomizeInfoEntity);
+            // 发布事件
+            eventSender.send(vo.getId(), vo.getCustomizeInfo(), null);
         });
 
         return true;
@@ -124,7 +129,20 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }), pageable);
-        return PageResult.of(page.getTotalElements(), this::entity2Vo, page.getContent());
+        Map<Long, UserCustomizeInfoEntity> map = new HashMap<>(iPageRequest.getNumber());
+        if (params != null && StringUtils.isBlank(params.getClient())) {
+            map.putAll(userCustomizeInfoRepository.findAllByUserIdInAndClientId(page.getContent().stream().map(UserEntity::getId).collect(Collectors.toList()), AuthConstants.VEA)
+                    .stream().collect(Collectors.toMap(UserCustomizeInfoEntity::getUserId, u -> u)));
+        }
+        PageResult<UserVO> pageResult = PageResult.of(page.getTotalElements(), this::entity2Vo, page.getContent());
+        if (MapUtils.isNotEmpty(map)) {
+            pageResult.getItems().forEach(vo -> {
+                if (map.containsKey(vo.getId())) {
+                    vo.setCustomizeInfo(map.get(vo.getId()).getInfo());
+                }
+            });
+        }
+        return pageResult;
     }
 
     @Override
@@ -135,13 +153,22 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = optional.get();
         UserVO vo = entity2Vo(userEntity);
 
+        getCustomerInfo(clientId, userEntity, vo);
+        return vo;
+    }
+
+    private void getCustomerInfo(String clientId, UserEntity userEntity, UserVO vo) {
         if (StringUtils.isNotBlank(clientId)) {
             UserCustomizeInfoEntity customizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(userEntity.getId(), clientId);
             if (customizeInfoEntity != null) {
                 vo.setCustomizeInfo(customizeInfoEntity.getInfo());
             }
+        } else {
+            UserCustomizeInfoEntity customizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(userEntity.getId(), AuthConstants.VEA);
+            if (customizeInfoEntity != null) {
+                vo.setCustomizeInfo(customizeInfoEntity.getInfo());
+            }
         }
-        return vo;
     }
 
     private UserVO entity2Vo(UserEntity userEntity) {

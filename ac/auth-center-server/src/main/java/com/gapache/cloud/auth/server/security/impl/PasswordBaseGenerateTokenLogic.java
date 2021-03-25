@@ -4,13 +4,13 @@ import com.gapache.cloud.auth.server.model.AuthorizeTokenDTO;
 import com.gapache.cloud.auth.server.model.ClientDetailsImpl;
 import com.gapache.cloud.auth.server.model.UserClientRelationDTO;
 import com.gapache.cloud.auth.server.model.UserDetailsImpl;
-import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.cloud.auth.server.security.BaseGenerateTokenLogic;
-import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.cloud.auth.server.service.ClientService;
 import com.gapache.cloud.auth.server.service.UserClientRelationService;
 import com.gapache.cloud.auth.server.service.UserService;
 import com.gapache.commons.model.ThrowUtils;
+import com.gapache.security.interfaces.AuthorizeInfoManager;
+import com.gapache.security.interfaces.GenerateTokenStrategy;
 import com.gapache.security.model.SecurityError;
 import com.gapache.security.model.TokenInfoDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -62,7 +62,7 @@ public class PasswordBaseGenerateTokenLogic extends BaseGenerateTokenLogic {
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
         Set<String> scopes = clientDetails.getScopes();
         scopes = scopes.stream().filter(scope -> authorities.contains(new SimpleGrantedAuthority(scope))).collect(Collectors.toSet());
-        authorizeInfoManager.save(token, clientDetails.getTimeout(), userDetails.getCustomerInfo(), scopes);
+        authorizeInfoManager.save(userDetails.getId(), token, clientDetails.getTimeout(), userDetails.getCustomerInfo(), scopes);
 
         TokenInfoDTO dto = new TokenInfoDTO();
         dto.setAccessToken(token);

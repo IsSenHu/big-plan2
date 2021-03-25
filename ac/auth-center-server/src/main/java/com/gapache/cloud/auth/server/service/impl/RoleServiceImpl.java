@@ -1,17 +1,21 @@
 package com.gapache.cloud.auth.server.service.impl;
 
+import com.gapache.cloud.auth.server.dao.entity.PermissionEntity;
+import com.gapache.cloud.auth.server.dao.entity.ResourceEntity;
 import com.gapache.cloud.auth.server.dao.entity.RoleEntity;
 import com.gapache.cloud.auth.server.dao.entity.RolePermissionEntity;
+import com.gapache.cloud.auth.server.dao.repository.resource.ResourceRepository;
+import com.gapache.cloud.auth.server.dao.repository.user.PermissionRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.RolePermissionRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.RoleRepository;
 import com.gapache.cloud.auth.server.service.RoleService;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
-import com.gapache.security.model.RoleCreateDTO;
-import com.gapache.security.model.RoleDTO;
-import com.gapache.security.model.RoleUpdateDTO;
-import com.gapache.security.model.SecurityError;
+import com.gapache.jpa.FindUtils;
+import com.gapache.security.entity.RoleScopesEntity;
+import com.gapache.security.model.*;
+import com.gapache.vertx.redis.support.SimpleRedisRepository;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -20,9 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import javax.annotation.PostConstruct;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,10 +37,37 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final RolePermissionRepository rolePermissionRepository;
+    private final ResourceRepository resourceRepository;
+    private final PermissionRepository permissionRepository;
+    private final SimpleRedisRepository simpleRedisRepository;
 
-    public RoleServiceImpl(RoleRepository roleRepository, RolePermissionRepository rolePermissionEntity) {
+    public RoleServiceImpl(RoleRepository roleRepository, RolePermissionRepository rolePermissionEntity, ResourceRepository resourceRepository, PermissionRepository permissionRepository, SimpleRedisRepository simpleRedisRepository) {
         this.roleRepository = roleRepository;
         this.rolePermissionRepository = rolePermissionEntity;
+        this.resourceRepository = resourceRepository;
+        this.permissionRepository = permissionRepository;
+        this.simpleRedisRepository = simpleRedisRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        List<RoleEntity> all = roleRepository.findAll();
+        all.forEach(role -> simpleRedisRepository.findById(role.getId().toString(), RoleScopesEntity.class)
+                .onSuccess(x -> {
+                    // 没有才缓存
+                    if (x.getRoleId() == null) {
+                        cacheRoleScopes(role);
+                    }
+                }));
+    }
+
+    private void cacheRoleScopes(RoleEntity role) {
+        RoleScopesEntity entity = new RoleScopesEntity();
+        entity.setRoleId(role.getId());
+        List<ResourceEntity> resources = resourceRepository.findCustomizeAllResourceFromRid(role.getId());
+        String scopes = resources.isEmpty() ? "" : resources.stream().map(ResourceEntity::fullScopeName).collect(Collectors.joining(","));
+        entity.setScopes(scopes);
+        simpleRedisRepository.save(entity);
     }
 
     @Override
@@ -46,6 +76,7 @@ public class RoleServiceImpl implements RoleService {
         RoleEntity entity = roleRepository.findByName(dto.getName());
         ThrowUtils.throwIfTrue(entity != null, SecurityError.ROLE_EXISTED);
 
+        entity = new RoleEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
         roleRepository.save(entity);
@@ -53,11 +84,13 @@ public class RoleServiceImpl implements RoleService {
 
         Set<Long> permissionList = dto.getPermissionList();
         saveOrUpdatePermission(roleId, permissionList);
+
+        cacheRoleScopes(entity);
         return true;
     }
 
     private void saveOrUpdatePermission(Long roleId, Set<Long> permissionList) {
-        if (!CollectionUtils.isEmpty(permissionList)) {
+        if (CollectionUtils.isNotEmpty(permissionList)) {
             List<RolePermissionEntity> rolePermissionEntities = rolePermissionRepository.findAllByRoleId(roleId);
             Set<Long> permissionIdOld = rolePermissionEntities.stream().map(RolePermissionEntity::getPermissionId).collect(Collectors.toSet());
             List<RolePermissionEntity> newAdd = permissionList.stream().filter(permissionId -> !permissionIdOld.contains(permissionId)).map(permissionId -> {
@@ -76,17 +109,18 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(RoleUpdateDTO dto) {
-        RoleEntity entity = roleRepository.findByName(dto.getName());
-        ThrowUtils.throwIfTrue(entity != null && StringUtils.equals(entity.getName(), dto.getName()), SecurityError.ROLE_EXISTED);
-
         Optional<RoleEntity> byId = roleRepository.findById(dto.getId());
         ThrowUtils.throwIfTrue(!byId.isPresent(), SecurityError.ROLE_NOT_FOUND);
+        if (!StringUtils.equals(byId.get().getName(), dto.getName())) {
+            ThrowUtils.throwIfTrue(roleRepository.findByName(dto.getName()) != null, SecurityError.ROLE_EXISTED);
+        }
 
         byId.ifPresent(roleEntity -> {
             roleEntity.setName(dto.getName());
             roleEntity.setDescription(dto.getDescription());
             roleRepository.save(roleEntity);
             saveOrUpdatePermission(roleEntity.getId(), dto.getPermissionList());
+            cacheRoleScopes(roleEntity);
         });
 
         return true;
@@ -97,6 +131,9 @@ public class RoleServiceImpl implements RoleService {
     public Boolean delete(Long id) {
         roleRepository.deleteById(id);
         rolePermissionRepository.deleteAllByRoleId(id);
+        RoleScopesEntity delete = new RoleScopesEntity();
+        delete.setRoleId(id);
+        simpleRedisRepository.delete(delete);
         return true;
     }
 
@@ -107,8 +144,82 @@ public class RoleServiceImpl implements RoleService {
         return PageResult.of(all.getTotalElements(), x -> {
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(x, roleDTO);
-            roleDTO.setId(x.getId());
             return roleDTO;
         }, all.getContent());
+    }
+
+    @Override
+    public RolePermissionDTO findRoleAndPermissions(Long id) {
+        RolePermissionDTO rolePermissionDTO = new RolePermissionDTO();
+        if (id != 0) {
+            Optional<RoleEntity> optional = roleRepository.findById(id);
+            ThrowUtils.throwIfTrue(!optional.isPresent(), SecurityError.ROLE_NOT_FOUND);
+
+            RoleEntity roleEntity = optional.get();
+            RoleDTO roleDTO = new RoleDTO();
+            BeanUtils.copyProperties(roleEntity, roleDTO);
+            rolePermissionDTO.setRole(roleDTO);
+        }
+
+        List<ElmUiTreeNode> elmUiTreeNodes = new ArrayList<>();
+        List<ResourceEntity> resources = resourceRepository.findAll();
+        List<PermissionEntity> permissions = permissionRepository.findAll();
+        rolePermissionDTO.setDefaultExpandedKeys(new HashSet<>(resources.size()));
+        rolePermissionDTO.setDefaultCheckedKeys(new HashSet<>(resources.size()));
+        Map<Long, PermissionEntity> permissionMap = permissions.stream().collect(Collectors.toMap(PermissionEntity::getResourceId, p -> p));
+        List<ResourceEntity> myResources = id != 0 ? resourceRepository.findCustomizeAllResourceFromRid(id) : new ArrayList<>(0);
+
+        Set<Long> myResourceIds = myResources.stream().map(ResourceEntity::getId).collect(Collectors.toSet());
+        resources.stream().collect(Collectors.groupingBy(ResourceEntity::getResourceServerId))
+                .forEach((resourceServerId, rs) -> {
+                    ElmUiTreeNode root = new ElmUiTreeNode();
+                    root.setId(resourceServerId.toString());
+                    root.setLabel(rs.get(0).getResourceServerName());
+                    root.setChildren(new ArrayList<>());
+                    rolePermissionDTO.getDefaultExpandedKeys().add(root.getId());
+                    elmUiTreeNodes.add(root);
+
+                    rs.stream().collect(Collectors.groupingBy(resourceEntity -> resourceEntity.getScope().split(":")[0]))
+                            .forEach((group, members) -> {
+                                ElmUiTreeNode model = new ElmUiTreeNode();
+                                // 预留10万个权限
+                                model.setId(resourceServerId + "-" + (resourceServerId * 100000 + root.getChildren().size()));
+                                model.setLabel(group);
+                                model.setChildren(new ArrayList<>());
+                                root.getChildren().add(model);
+                                rolePermissionDTO.getDefaultExpandedKeys().add(model.getId());
+
+                                members.forEach(member -> {
+                                    ElmUiTreeNode node = new ElmUiTreeNode();
+                                    PermissionEntity permissionEntity = permissionMap.get(member.getId());
+                                    if (permissionEntity != null) {
+                                        // 这里应该使用权限的Id
+                                        node.setId(model.getId() + "-" + permissionEntity.getId());
+                                        node.setLabel(member.getName());
+                                        model.getChildren().add(node);
+
+                                        if (myResourceIds.contains(member.getId())) {
+                                            rolePermissionDTO.getDefaultCheckedKeys().add(node.getId());
+                                            rolePermissionDTO.getDefaultCheckedKeys().add(model.getId());
+                                            rolePermissionDTO.getDefaultCheckedKeys().add(root.getId());
+                                        }
+                                    }
+                                });
+                            });
+                });
+
+        rolePermissionDTO.setPermissions(elmUiTreeNodes);
+
+        return rolePermissionDTO;
+    }
+
+    @Override
+    public List<RoleDTO> findAllByName(String name) {
+        List<RoleEntity> entities = StringUtils.isNotBlank(name) ? roleRepository.findAllByNameLike(FindUtils.allMatch(name)) : roleRepository.findAll();
+        return entities.stream().map(entity -> {
+            RoleDTO roleDTO = new RoleDTO();
+            BeanUtils.copyProperties(entity, roleDTO);
+            return roleDTO;
+        }).collect(Collectors.toList());
     }
 }

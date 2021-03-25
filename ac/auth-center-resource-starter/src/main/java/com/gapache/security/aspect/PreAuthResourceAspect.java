@@ -1,5 +1,6 @@
 package com.gapache.security.aspect;
 
+import com.gapache.commons.model.AuthConstants;
 import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.cache.AuthResourceCache;
 import com.gapache.commons.model.SecurityException;
@@ -35,6 +36,11 @@ public class PreAuthResourceAspect {
         String fullScope = AuthResourceCache.checkFullScope(authResource);
         if (!accessCard.getAuthorities().contains(fullScope)) {
             throw new SecurityException(SecurityError.FORBIDDEN);
+        }
+        // 校验用户是否已被禁用
+        Object isEnabled = accessCard.getCustomerInfo().get(AuthConstants.IS_ENABLED);
+        if (authResource.checkEnabled() && isEnabled != null && !(Boolean) isEnabled) {
+            throw new SecurityException(SecurityError.USER_DISABLED);
         }
     }
 }

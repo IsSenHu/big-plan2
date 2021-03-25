@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "tb_user")
-public class UserEntity extends OpFullRecordEntity<String> {
+public class UserEntity extends OpFullRecordEntity<Long> {
 
     /**
      * ID

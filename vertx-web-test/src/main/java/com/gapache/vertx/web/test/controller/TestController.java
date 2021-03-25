@@ -1,11 +1,11 @@
 package com.gapache.vertx.web.test.controller;
 
 import com.gapache.commons.model.JsonResult;
+import com.gapache.vertx.core.VertxManager;
 import com.gapache.vertx.web.annotation.GetRouting;
 import com.gapache.vertx.web.annotation.PostRouting;
 import com.gapache.vertx.web.annotation.RequestRouting;
 import com.gapache.vertx.web.annotation.VertxController;
-import com.gapache.vertx.web.core.VertxManager;
 import com.gapache.vertx.web.test.client.Test2Client;
 import com.gapache.vertx.web.test.client.Test4Client;
 import com.gapache.vertx.web.test.pojo.TestPoJo;

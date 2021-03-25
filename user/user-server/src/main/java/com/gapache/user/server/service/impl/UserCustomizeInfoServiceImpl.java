@@ -1,14 +1,17 @@
 package com.gapache.user.server.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.gapache.commons.model.AuthConstants;
+import com.gapache.security.event.EventSender;
 import com.gapache.user.common.model.vo.UserCustomizeInfoVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
 import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
 import com.gapache.user.server.service.UserCustomizeInfoService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 /**
  * @author HuSen
@@ -18,9 +21,11 @@ import java.util.Optional;
 public class UserCustomizeInfoServiceImpl implements UserCustomizeInfoService {
 
     private final UserCustomizeInfoRepository userCustomizeInfoRepository;
+    private final EventSender eventSender;
 
-    public UserCustomizeInfoServiceImpl(UserCustomizeInfoRepository userCustomizeInfoRepository) {
+    public UserCustomizeInfoServiceImpl(UserCustomizeInfoRepository userCustomizeInfoRepository, EventSender eventSender) {
         this.userCustomizeInfoRepository = userCustomizeInfoRepository;
+        this.eventSender = eventSender;
     }
 
     @Override
@@ -41,13 +46,21 @@ public class UserCustomizeInfoServiceImpl implements UserCustomizeInfoService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean update(UserCustomizeInfoVO vo) {
-        Optional<UserCustomizeInfoEntity> optional = userCustomizeInfoRepository.findById(vo.getId());
-        optional.ifPresent(entity -> {
-            entity.setUserId(vo.getUserId());
-            entity.setClientId(vo.getClientId());
-            entity.setInfo(vo.getInfo());
+        UserCustomizeInfoEntity entity = userCustomizeInfoRepository.findByUserIdAndClientId(vo.getUserId(), vo.getClientId());
+        if (entity != null && StringUtils.isNotBlank(vo.getInfo())) {
+            if (StringUtils.isBlank(entity.getInfo())) {
+                entity.setInfo(vo.getInfo());
+            } else {
+                JSONObject newValues = JSON.parseObject(vo.getInfo());
+                JSONObject oldValues = JSON.parseObject(entity.getInfo());
+                newValues.forEach(oldValues::put);
+                entity.setInfo(oldValues.toJSONString());
+
+                // 发布事件
+                eventSender.send(vo.getUserId(), newValues.toJSONString(), null);
+            }
             userCustomizeInfoRepository.save(entity);
-        });
+        }
         return true;
     }
 
@@ -67,5 +80,17 @@ public class UserCustomizeInfoServiceImpl implements UserCustomizeInfoService {
                     return vo;
                 })
                 .orElse(null);
+    }
+
+    @Override
+    public Object findValue(Long userId, String clientId, String key) {
+        clientId = StringUtils.isNotBlank(clientId) ? clientId : AuthConstants.VEA;
+        UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(userId, clientId);
+        if (userCustomizeInfoEntity == null || StringUtils.isBlank(userCustomizeInfoEntity.getInfo())) {
+            return null;
+        }
+
+        JSONObject jsonObject = JSON.parseObject(userCustomizeInfoEntity.getInfo());
+        return jsonObject.get(key);
     }
 }

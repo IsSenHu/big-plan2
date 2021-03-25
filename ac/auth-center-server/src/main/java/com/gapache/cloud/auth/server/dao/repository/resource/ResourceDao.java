@@ -12,5 +12,7 @@ public interface ResourceDao {
 
     List<ResourceEntity> findAllResource(Long userId);
 
+    List<ResourceEntity> findCustomizeAllResourceFromRid(Long roleId);
+
     ResourceEntity findResourceCustomizeById(Long id);
 }

@@ -30,34 +30,44 @@ public class ResourceDaoImpl extends BaseJpaRepositoryBean<ResourceEntity, Long>
         super(ResourceEntity.class, entityManager);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ResourceEntity> findAllResource(Long userId) {
-        String sql = sqlMap.get("FindAllResourceByRoleId");
+        String sql = sqlMap.get("FindAllResourceByUserId");
         if (StringUtils.isBlank(sql)) {
             try {
                 byte[] bytes = FileCopyUtils.copyToByteArray(new ClassPathResource("sql/FindAllResourceByUserId.sql").getInputStream());
                 sql = IStringUtils.newString(bytes);
-                sqlMap.put("FindAllResourceByRoleId", sql);
+                sqlMap.put("FindAllResourceByUserId", sql);
             } catch (IOException e) {
                 log.error("findAllResource error:{}", userId, e);
                 return Lists.newArrayList();
             }
         }
-        Query query = em.createNativeQuery("SELECT\n" +
-                "       tr.id AS id,\n" +
-                "       tr.resource_server_id AS resource_server_id,\n" +
-                "       tr.resource_server_name AS resource_server_name,\n" +
-                "       tr.scope AS scope,\n" +
-                "       tr.name AS  name\n" +
-                "FROM tb_resource tr", ResourceEntity.class);
-//        query.setParameter("userId", userId);
-        for (Map.Entry<String, Object> hint : query.getHints().entrySet()) {
-            System.out.println(hint);
-            query.setHint(hint.getKey(), hint.getValue());
+        Query query = em.createNativeQuery(sql, ResourceEntity.class);
+        query.setParameter("userId", userId);
+
+        return query.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ResourceEntity> findCustomizeAllResourceFromRid(Long roleId) {
+        String sql = sqlMap.get("FindAllResourceByRoleId");
+        if (StringUtils.isBlank(sql)) {
+            try {
+                byte[] bytes = FileCopyUtils.copyToByteArray(new ClassPathResource("sql/FindAllResourceByRoleId.sql").getInputStream());
+                sql = IStringUtils.newString(bytes);
+                sqlMap.put("FindAllResourceByRoleId", sql);
+            } catch (IOException e) {
+                log.error("findAllResourceCustomizeByRoleId error:{}", roleId, e);
+                return Lists.newArrayList();
+            }
         }
-        System.out.println(query.getResultList());
-        // 这个就必须加注解才能进行自动映射
-        return null;
+        Query query = em.createNativeQuery(sql, ResourceEntity.class);
+        query.setParameter("roleId", roleId);
+
+        return query.getResultList();
     }
 
     @Override

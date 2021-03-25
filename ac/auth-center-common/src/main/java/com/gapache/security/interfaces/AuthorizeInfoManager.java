@@ -13,12 +13,13 @@ public interface AuthorizeInfoManager {
     /**
      * 保存授权后的信息
      *
+     * @param userId       用户ID
      * @param token        accessToken
      * @param timeout      有效时长
      * @param customerInfo 用户自定义信息
      * @param scopes       作用域
      */
-    void save(String token, Long timeout, CustomerInfo customerInfo, Collection<String> scopes);
+    void save(Long userId, String token, Long timeout, CustomerInfo customerInfo, Collection<String> scopes);
 
     /**
      * 删除授权后的信息

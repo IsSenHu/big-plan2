@@ -6,10 +6,7 @@ import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.annotation.NeedAuth;
 import com.gapache.security.model.SetUserRoleDTO;
 import com.gapache.user.common.model.vo.UserVO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -35,5 +32,16 @@ public class UserController {
     @AuthResource(scope = "setUserRole", name = "设置用户角色")
     public JsonResult<Boolean> setUserRole(@RequestBody SetUserRoleDTO dto) {
         return JsonResult.of(userService.setUserRole(dto));
+    }
+
+    @GetMapping("/findUserRoleId/{userId}")
+    @AuthResource(scope = "findUserRoleId", name = "查询用户的角色")
+    public JsonResult<Long> findUserRoleId(@PathVariable Long userId) {
+        return JsonResult.of(userService.findUserRoleId(userId));
+    }
+
+    @GetMapping("/isEnabled/{userId}")
+    public JsonResult<Boolean> isEnabled(@PathVariable Long userId) {
+        return JsonResult.of(userService.isEnabled(userId));
     }
 }

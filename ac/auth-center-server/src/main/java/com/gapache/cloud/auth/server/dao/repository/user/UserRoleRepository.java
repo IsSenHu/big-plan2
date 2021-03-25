@@ -9,4 +9,5 @@ import com.gapache.jpa.BaseJpaRepository;
  */
 public interface UserRoleRepository extends BaseJpaRepository<UserRoleEntity, Long> {
 
+    UserRoleEntity findByUserId(Long userId);
 }

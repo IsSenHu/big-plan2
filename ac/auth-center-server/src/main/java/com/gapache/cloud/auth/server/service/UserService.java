@@ -31,4 +31,8 @@ public interface UserService extends UserDetailsService {
     Boolean logout(HttpServletRequest request);
 
     Boolean setUserRole(SetUserRoleDTO dto);
+
+    Long findUserRoleId(Long userId);
+
+    Boolean isEnabled(Long userId);
 }
