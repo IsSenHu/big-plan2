@@ -6,10 +6,13 @@ import com.gapache.commons.model.PageResult;
 import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.annotation.NeedAuth;
 import com.gapache.user.common.model.vo.UserVO;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
 import com.gapache.user.server.service.UserService;
 import com.gapache.web.Check;
 import com.gapache.web.Validating;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author HuSen
@@ -71,5 +74,19 @@ public class UserController {
     public JsonResult<PageResult<UserVO>> page(@RequestBody IPageRequest<UserVO> iPageRequest) {
         PageResult<UserVO> pageResult = userService.page(iPageRequest);
         return JsonResult.of(pageResult);
+    }
+
+    @PostMapping("/saveUserRelation")
+    @AuthResource(scope = "saveUserRelation", name = "保存用户所属关系")
+    public JsonResult<Boolean> saveUserRelation(@RequestBody SaveUserRelationVO vo) {
+        Boolean result = userService.saveUserRelation(vo);
+        return JsonResult.of(result);
+    }
+
+    @PostMapping("/findAllByIdIn")
+    @AuthResource(scope = "findAllByIdIn", name = "根据一系列ID查询用户")
+    public JsonResult<List<UserVO>> findAllByIdIn(@RequestBody List<Long> userIds) {
+        List<UserVO> list = userService.findAllByIdIn(userIds);
+        return JsonResult.of(list);
     }
 }

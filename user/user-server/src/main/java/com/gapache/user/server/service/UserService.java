@@ -3,6 +3,9 @@ package com.gapache.user.server.service;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.PageResult;
 import com.gapache.user.common.model.vo.UserVO;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
+
+import java.util.List;
 
 /**
  * @author HuSen
@@ -23,4 +26,8 @@ public interface UserService {
     boolean update(UserVO vo);
 
     PageResult<UserVO> page(IPageRequest<UserVO> iPageRequest);
+
+    Boolean saveUserRelation(SaveUserRelationVO vo);
+
+    List<UserVO> findAllByIdIn(List<Long> userIds);
 }

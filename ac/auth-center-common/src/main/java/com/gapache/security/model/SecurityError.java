@@ -27,7 +27,11 @@ public enum SecurityError implements Error {
     ROLE_EXISTED(10516, "role existed"),
     ROLE_NOT_FOUND(10517, "role not found"),
     USER_NOT_FOUND(10518, "user not found"),
-    USER_DISABLED(10519, "user is disabled");
+    USER_DISABLED(10519, "user is disabled"),
+    POSITION_NAME_EXISTED(10520, "position name is existed"),
+    POSITION_NOT_FOUND(10521, "position not found"),
+    COMPANY_NAME_EXISTED(10522, "company name is exited"),
+    COMPANY_NOT_FOUND(10523, "company not found");
 
     SecurityError(Integer code, String error) {
         this.code = code;

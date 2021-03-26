@@ -18,4 +18,6 @@ public class ElmUiTreeNode implements Serializable {
     private String label;
 
     private List<ElmUiTreeNode> children;
+
+    private Object data;
 }

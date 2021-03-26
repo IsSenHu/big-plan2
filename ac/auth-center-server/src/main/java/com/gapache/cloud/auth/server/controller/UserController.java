@@ -9,6 +9,7 @@ import com.gapache.user.common.model.vo.UserVO;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author HuSen
@@ -43,5 +44,17 @@ public class UserController {
     @GetMapping("/isEnabled/{userId}")
     public JsonResult<Boolean> isEnabled(@PathVariable Long userId) {
         return JsonResult.of(userService.isEnabled(userId));
+    }
+
+    @GetMapping("/findAllByPositionId/{positionId}")
+    @AuthResource(scope = "findAllByPositionId", name = "根据职位查询用户")
+    public JsonResult<List<UserVO>> findAllByPositionId(@PathVariable Long positionId) {
+        return JsonResult.of(userService.findAllByPositionId(positionId));
+    }
+
+    @GetMapping("/findAllByPositionIdBetween/{lowPositionId}")
+    @AuthResource(scope = "findAllByPositionIdBetween", name = "查询低于等于我并且高于指定职位的用户")
+    public JsonResult<List<UserVO>> findAllByPositionIdBetween(@PathVariable Long lowPositionId) {
+        return JsonResult.of(userService.findAllByPositionIdBetween(lowPositionId));
     }
 }

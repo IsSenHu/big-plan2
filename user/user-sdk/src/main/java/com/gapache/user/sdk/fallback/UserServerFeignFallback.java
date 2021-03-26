@@ -2,10 +2,13 @@ package com.gapache.user.sdk.fallback;
 
 import com.gapache.commons.model.JsonResult;
 import com.gapache.commons.model.SystemError;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.sdk.feign.UserServerFeign;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author HuSen
@@ -27,6 +30,16 @@ public class UserServerFeignFallback implements UserServerFeign {
 
     @Override
     public JsonResult<UserVO> findByUsername(String username, String clientId) {
+        return JsonResult.of(SystemError.SERVER_DEGRADE);
+    }
+
+    @Override
+    public JsonResult<Boolean> saveUserRelation(SaveUserRelationVO vo) {
+        return JsonResult.of(SystemError.SERVER_DEGRADE);
+    }
+
+    @Override
+    public JsonResult<List<UserVO>> findAllByIdIn(List<Long> userIds) {
         return JsonResult.of(SystemError.SERVER_DEGRADE);
     }
 

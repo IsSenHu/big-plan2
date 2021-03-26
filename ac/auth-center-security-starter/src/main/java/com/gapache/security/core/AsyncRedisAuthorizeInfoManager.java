@@ -62,10 +62,14 @@ public class AsyncRedisAuthorizeInfoManager implements AsyncAuthorizeInfoManager
     public Future<AuthorizeInfoDTO> get(String token) {
         return Future.future(event -> simpleRedisRepository.findById(token, AuthorizeInfoEntity.class)
                 .onSuccess(entity -> {
-                    AuthorizeInfoDTO dto = new AuthorizeInfoDTO();
-                    dto.setScopes(Arrays.stream(entity.getScopes().split(",")).collect(Collectors.toList()));
-                    dto.setCustomerInfo(JSON.parseObject(entity.getCustomerInfo(), CustomerInfo.class));
-                    event.complete(dto);
+                    if (entity.getId() == null) {
+                        event.complete();
+                    } else {
+                        AuthorizeInfoDTO dto = new AuthorizeInfoDTO();
+                        dto.setScopes(Arrays.stream(entity.getScopes().split(",")).collect(Collectors.toList()));
+                        dto.setCustomerInfo(JSON.parseObject(entity.getCustomerInfo(), CustomerInfo.class));
+                        event.complete(dto);
+                    }
                 })
                 .onFailure(event::fail));
     }

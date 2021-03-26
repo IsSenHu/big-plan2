@@ -9,6 +9,7 @@ import com.gapache.user.common.model.vo.UserVO;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author HuSen
@@ -35,4 +36,8 @@ public interface UserService extends UserDetailsService {
     Long findUserRoleId(Long userId);
 
     Boolean isEnabled(Long userId);
+
+    List<UserVO> findAllByPositionId(Long positionId);
+
+    List<UserVO> findAllByPositionIdBetween(Long lowPositionId);
 }

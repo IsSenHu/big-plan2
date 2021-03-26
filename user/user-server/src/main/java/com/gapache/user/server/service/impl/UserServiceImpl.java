@@ -8,12 +8,17 @@ import com.gapache.jpa.FindUtils;
 import com.gapache.jpa.PageHelper;
 import com.gapache.jpa.SpecificationFactory;
 import com.gapache.security.event.EventSender;
+import com.gapache.security.holder.AccessCardHolder;
+import com.gapache.security.model.AccessCard;
 import com.gapache.user.common.model.UserError;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
 import com.gapache.user.server.dao.entity.UserEntity;
+import com.gapache.user.server.dao.entity.UserRelationEntity;
 import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
+import com.gapache.user.server.dao.repository.UserRelationRepository;
 import com.gapache.user.server.dao.repository.UserRepository;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
 import com.gapache.user.server.service.UserService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,9 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -37,11 +40,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserCustomizeInfoRepository userCustomizeInfoRepository;
     private final EventSender eventSender;
+    private final UserRelationRepository userRelationRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository, EventSender eventSender) {
+    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository, EventSender eventSender, UserRelationRepository userRelationRepository) {
         this.userRepository = userRepository;
         this.userCustomizeInfoRepository = userCustomizeInfoRepository;
         this.eventSender = eventSender;
+        this.userRelationRepository = userRelationRepository;
     }
 
     @Override
@@ -120,18 +125,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageResult<UserVO> page(IPageRequest<UserVO> iPageRequest) {
+        AccessCard accessCard = AccessCardHolder.getContext();
         Pageable pageable = PageHelper.of(iPageRequest);
         UserVO params = iPageRequest.getCustomParams();
-        Page<UserEntity> page = userRepository.findAll(SpecificationFactory.produce((predicates, root, criteriaBuilder) -> {
-            if (params != null) {
-                if (StringUtils.isNotBlank(params.getUsername())) {
-                    predicates.add(criteriaBuilder.like(root.get("username").as(String.class), FindUtils.allMatch(params.getUsername())));
-                }
+        Page<UserEntity> page;
+        if (accessCard.getCustomerInfo().containsKey(AuthConstants.POSITION_ID)
+                || accessCard.getCustomerInfo().containsKey(AuthConstants.SUPERIOR_ID)) {
+            if (StringUtils.isNotBlank(params.getUsername())) {
+                page = userRepository.findAllByOwnerIdAndUsernameLike(FindUtils.allMatch(params.getUsername()), accessCard.getUserId(), pageable);
+            } else {
+                page = userRepository.findAllByOwnerId(accessCard.getUserId(), pageable);
             }
-        }), pageable);
+        } else {
+            page = userRepository.findAll(SpecificationFactory.produce((predicates, root, criteriaBuilder) -> {
+                if (params != null) {
+                    if (StringUtils.isNotBlank(params.getUsername())) {
+                        predicates.add(criteriaBuilder.like(root.get("username").as(String.class), FindUtils.allMatch(params.getUsername())));
+                    }
+                }
+            }), pageable);
+        }
+
         Map<Long, UserCustomizeInfoEntity> map = new HashMap<>(iPageRequest.getNumber());
         if (params != null && StringUtils.isBlank(params.getClient())) {
-            map.putAll(userCustomizeInfoRepository.findAllByUserIdInAndClientId(page.getContent().stream().map(UserEntity::getId).collect(Collectors.toList()), AuthConstants.VEA)
+            map.putAll(userCustomizeInfoRepository.findAllByUserIdInAndClientId(page.getContent().stream().map(UserEntity::getId).collect(Collectors.toList()), accessCard.checkClientId())
                     .stream().collect(Collectors.toMap(UserCustomizeInfoEntity::getUserId, u -> u)));
         }
         PageResult<UserVO> pageResult = PageResult.of(page.getTotalElements(), this::entity2Vo, page.getContent());
@@ -155,6 +172,37 @@ public class UserServiceImpl implements UserService {
 
         getCustomerInfo(clientId, userEntity, vo);
         return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveUserRelation(SaveUserRelationVO vo) {
+        switch (vo.getType()) {
+            // 新增
+            case 0: {
+                List<UserRelationEntity> addList = new ArrayList<>(vo.getOwnerIdList().size());
+                for (Long ownerId : vo.getOwnerIdList()) {
+                    if (userRelationRepository.existsByOwnerIdAndUserId(ownerId, vo.getUserId())) {
+                        continue;
+                    }
+                    UserRelationEntity entity = new UserRelationEntity();
+                    entity.setOwnerId(ownerId);
+                    entity.setUserId(vo.getUserId());
+                    addList.add(entity);
+                }
+                userRelationRepository.saveAll(addList);
+            }
+            default:
+        }
+        return true;
+    }
+
+    @Override
+    public List<UserVO> findAllByIdIn(List<Long> userIds) {
+        return userRepository.findAllById(userIds)
+                .stream()
+                .map(this::entity2Vo)
+                .collect(Collectors.toList());
     }
 
     private void getCustomerInfo(String clientId, UserEntity userEntity, UserVO vo) {

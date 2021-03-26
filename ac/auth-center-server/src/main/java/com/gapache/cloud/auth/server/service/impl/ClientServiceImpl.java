@@ -7,11 +7,16 @@ import com.gapache.cloud.auth.server.dao.repository.resource.ResourceRepository;
 import com.gapache.cloud.auth.server.model.ClientDetailsImpl;
 import com.gapache.cloud.auth.server.service.ClientService;
 import com.gapache.cloud.auth.server.utils.DynamicPropertyUtils;
+import com.gapache.commons.model.IPageRequest;
+import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
+import com.gapache.jpa.PageHelper;
 import com.gapache.security.model.ClientDTO;
 import com.gapache.security.model.SecurityError;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -94,6 +99,19 @@ public class ClientServiceImpl implements ClientService {
         ClientDTO dto = new ClientDTO();
         BeanUtils.copyProperties(clientEntity, dto);
         dto.setId(clientEntity.getId());
+        dto.setSecret(null);
         return dto;
+    }
+
+    @Override
+    public PageResult<ClientDTO> page(IPageRequest<ClientDTO> iPageRequest) {
+        Pageable pageable = PageHelper.of(iPageRequest);
+        Page<ClientEntity> page = clientRepository.findAll(pageable);
+        return PageResult.of(page.getTotalElements(), entity -> {
+            ClientDTO dto = new ClientDTO();
+            BeanUtils.copyProperties(entity, dto);
+            dto.setSecret(null);
+            return dto;
+        }, page.getContent());
     }
 }

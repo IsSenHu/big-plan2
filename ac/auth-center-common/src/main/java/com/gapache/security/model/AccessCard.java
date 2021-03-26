@@ -1,7 +1,9 @@
 package com.gapache.security.model;
 
 import com.dyuproject.protostuff.Tag;
+import com.gapache.commons.model.AuthConstants;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,5 +33,9 @@ public class AccessCard {
         accessCard.setAuthorities(new HashSet<>(0));
         accessCard.setSign(false);
         return accessCard;
+    }
+
+    public String checkClientId() {
+        return StringUtils.isBlank(clientId) ? AuthConstants.VEA : clientId;
     }
 }

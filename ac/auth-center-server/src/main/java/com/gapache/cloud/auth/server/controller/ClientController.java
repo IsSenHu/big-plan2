@@ -3,7 +3,9 @@ package com.gapache.cloud.auth.server.controller;
 import com.gapache.cloud.auth.server.model.UserClientRelationDTO;
 import com.gapache.cloud.auth.server.service.ClientService;
 import com.gapache.cloud.auth.server.service.UserClientRelationService;
+import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.JsonResult;
+import com.gapache.commons.model.PageResult;
 import com.gapache.security.annotation.AuthResource;
 import com.gapache.security.annotation.NeedAuth;
 import com.gapache.security.model.ClientDTO;
@@ -43,5 +45,11 @@ public class ClientController {
     @AuthResource(scope = "findByClientId", name = "根据clientId查询client")
     public JsonResult<ClientDTO> findByClientId(@PathVariable String clientId) {
         return JsonResult.of(clientService.findDtoByClientId(clientId));
+    }
+
+    @PostMapping("/page")
+    @AuthResource(scope = "page", name = "分页查询Client")
+    public JsonResult<PageResult<ClientDTO>> page(@RequestBody IPageRequest<ClientDTO> iPageRequest) {
+        return JsonResult.of(clientService.page(iPageRequest));
     }
 }

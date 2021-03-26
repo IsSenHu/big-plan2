@@ -2,17 +2,16 @@ package com.gapache.cloud.auth.server.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.gapache.cloud.auth.server.dao.entity.ClientEntity;
-import com.gapache.cloud.auth.server.dao.entity.ResourceEntity;
-import com.gapache.cloud.auth.server.dao.entity.UserEntity;
-import com.gapache.cloud.auth.server.dao.entity.UserRoleEntity;
+import com.gapache.cloud.auth.server.dao.entity.*;
 import com.gapache.cloud.auth.server.dao.repository.client.ClientRepository;
+import com.gapache.cloud.auth.server.dao.repository.position.UserPositionRepository;
 import com.gapache.cloud.auth.server.dao.repository.resource.ResourceRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.RoleRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.UserClientRelationRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.UserRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.UserRoleRepository;
 import com.gapache.cloud.auth.server.model.UserDetailsImpl;
+import com.gapache.cloud.auth.server.service.PositionService;
 import com.gapache.cloud.auth.server.service.UserService;
 import com.gapache.cloud.auth.server.utils.DynamicPropertyUtils;
 import com.gapache.commons.model.AuthConstants;
@@ -21,12 +20,14 @@ import com.gapache.commons.model.SecurityException;
 import com.gapache.commons.model.ThrowUtils;
 import com.gapache.security.entity.AuthorizeInfoEntity;
 import com.gapache.security.entity.IdTokenEntity;
+import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.interfaces.AsyncAuthorizeInfoManager;
 import com.gapache.security.interfaces.AuthorizeInfoManager;
 import com.gapache.security.model.*;
 import com.gapache.security.model.impl.CertificationImpl;
 import com.gapache.security.properties.SecurityProperties;
 import com.gapache.security.utils.JwtUtils;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.sdk.feign.UserServerFeign;
 import com.gapache.vertx.core.VertxCreatedEvent;
@@ -52,10 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -108,6 +106,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
 
     @Resource
     private AsyncAuthorizeInfoManager asyncAuthorizeInfoManager;
+
+    @Resource
+    private UserPositionRepository userPositionRepository;
+
+    @Resource
+    private PositionService positionService;
 
     private final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
@@ -323,23 +327,67 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean create(UserVO vo) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        String clientId = accessCard.checkClientId();
+        vo.setClient(clientId);
         // 密码加密
         vo.setPassword(passwordEncoder.encode(vo.getPassword()));
-        if (StringUtils.isBlank(vo.getClient())) {
-            vo.setClient(AuthConstants.VEA);
-        }
         JsonResult<UserVO> result = userServerFeign.create(vo);
 
         if (result.requestSuccess()) {
+            // 设置角色
             if (vo.getRoleId() != null) {
                 SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
                 setUserRoleDTO.setUserId(result.getData().getId());
                 setUserRoleDTO.setRoleId(vo.getRoleId());
                 setUserRole(setUserRoleDTO);
             }
-        }
+            // 绑定客户端
+            if (!StringUtils.equals(vo.getClient(), AuthConstants.VEA)) {
+                ClientEntity byClientId = clientRepository.findByClientId(vo.getClient());
+                ThrowUtils.throwIfTrue(byClientId == null, SecurityError.CLIENT_ERROR);
 
+                UserClientRelationEntity userClientRelationEntity = new UserClientRelationEntity();
+                userClientRelationEntity.setUserId(result.getData().getId());
+                userClientRelationEntity.setClientId(byClientId.getId());
+                userClientRelationRepository.save(userClientRelationEntity);
+            }
+
+            String customizeInfo = vo.getCustomizeInfo();
+            if (StringUtils.isNotBlank(customizeInfo)) {
+                JSONObject customerInfo = JSON.parseObject(customizeInfo);
+                if (customerInfo.containsKey(AuthConstants.POSITION_ID) || customerInfo.containsKey(AuthConstants.SUPERIOR_ID)) {
+                    Long positionId = customerInfo.getLong(AuthConstants.POSITION_ID);
+                    Long superiorId = customerInfo.getLong(AuthConstants.SUPERIOR_ID);
+                    UserPositionEntity userPositionEntity = new UserPositionEntity();
+                    userPositionEntity.setUserId(result.getData().getId());
+                    userPositionEntity.setPositionId(positionId);
+                    userPositionEntity.setSuperiorId(superiorId);
+                    userPositionRepository.save(userPositionEntity);
+                    // 如果上级Id不为空，则更新所属用户
+                    if (superiorId != null) {
+                        List<Long> ownerIdList = new ArrayList<>();
+                        deepSearchOwnerId(ownerIdList, superiorId);
+                        SaveUserRelationVO saveUserRelationVO = new SaveUserRelationVO();
+                        saveUserRelationVO.setType(0);
+                        saveUserRelationVO.setOwnerIdList(ownerIdList);
+                        saveUserRelationVO.setUserId(result.getData().getId());
+                        JsonResult<Boolean> saveUserRelation = userServerFeign.saveUserRelation(saveUserRelationVO);
+                        log.info(">>>>>> saveUserRelation result:{}", saveUserRelation);
+                    }
+                }
+            }
+        }
         return result.requestSuccess();
+    }
+
+    private void deepSearchOwnerId(List<Long> ownerIdList, Long superiorId) {
+        if (superiorId == null) {
+            return;
+        }
+        ownerIdList.add(superiorId);
+        Optional<UserPositionEntity> byId = userPositionRepository.findById(superiorId);
+        byId.ifPresent(entity -> deepSearchOwnerId(ownerIdList, entity.getSuperiorId()));
     }
 
     @Override
@@ -390,5 +438,36 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         }
         JsonResult<Object> value = userServerFeign.findValue(userId, AuthConstants.VEA, IS_ENABLED);
         return value.getData() != null ? (Boolean) value.getData() : true;
+    }
+
+    @Override
+    public List<UserVO> findAllByPositionId(Long positionId) {
+        List<UserPositionEntity> userPositionEntities = userPositionRepository.findAllByPositionId(positionId);
+        return userServerFeign.findAllByIdIn(userPositionEntities.stream().map(UserPositionEntity::getUserId).collect(Collectors.toList()))
+                .getData();
+    }
+
+    @Override
+    public List<UserVO> findAllByPositionIdBetween(Long lowPositionId) {
+        List<PositionDTO> all = positionService.findAll(true, lowPositionId);
+        Map<Long, String> positionIdMap = all.stream().collect(Collectors.toMap(PositionDTO::getId, PositionDTO::getName));
+
+        List<UserPositionEntity> userPositionEntities = userPositionRepository
+                .findAllByPositionIdIn(all.stream().map(PositionDTO::getId).collect(Collectors.toList()));
+
+        Map<Long, Long> userIdPositionIdMap = userPositionEntities
+                .stream()
+                .collect(Collectors.toMap(UserPositionEntity::getUserId, UserPositionEntity::getSuperiorId));
+
+        JsonResult<List<UserVO>> listUserResult = userServerFeign.findAllByIdIn(new ArrayList<>(userIdPositionIdMap.keySet()));
+        if (!listUserResult.requestSuccess()) {
+            return new ArrayList<>();
+        }
+
+        listUserResult.getData().forEach(user -> {
+            String positionName = positionIdMap.get(userIdPositionIdMap.get(user.getId()));
+            user.setUsername(positionName.concat(":").concat(user.getUsername()));
+        });
+        return new ArrayList<>(listUserResult.getData());
     }
 }
