@@ -67,7 +67,6 @@ public class RoleController {
     public JsonResult<List<RoleDTO>> findAllByName(@RequestParam String name) {
         // TODO 主角色由超级管理员来分配
         // TODO 给角色分组 组的标识为一个主角色
-        // TODO 主角色可以分配自己所有的权限角色
         // TODO 管理属于自己组的角色
         return JsonResult.of(roleService.findAllByName(name));
     }

@@ -14,6 +14,7 @@ import com.gapache.commons.model.PageResult;
 import com.gapache.commons.model.ThrowUtils;
 import com.gapache.jpa.FindUtils;
 import com.gapache.security.entity.RoleScopesEntity;
+import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.model.*;
 import com.gapache.vertx.redis.support.SimpleRedisRepository;
 import org.apache.commons.collections4.CollectionUtils;
@@ -150,6 +151,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RolePermissionDTO findRoleAndPermissions(Long id) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+
+        // TODO 主角色可以分配自己所有的权限给角色
         RolePermissionDTO rolePermissionDTO = new RolePermissionDTO();
         if (id != 0) {
             Optional<RoleEntity> optional = roleRepository.findById(id);
@@ -163,10 +167,12 @@ public class RoleServiceImpl implements RoleService {
 
         List<ElmUiTreeNode> elmUiTreeNodes = new ArrayList<>();
         List<ResourceEntity> resources = resourceRepository.findAll();
+        // 可分配的所有权限
         List<PermissionEntity> permissions = permissionRepository.findAll();
         rolePermissionDTO.setDefaultExpandedKeys(new HashSet<>(resources.size()));
         rolePermissionDTO.setDefaultCheckedKeys(new HashSet<>(resources.size()));
         Map<Long, PermissionEntity> permissionMap = permissions.stream().collect(Collectors.toMap(PermissionEntity::getResourceId, p -> p));
+        // 自己可访问的资源
         List<ResourceEntity> myResources = id != 0 ? resourceRepository.findCustomizeAllResourceFromRid(id) : new ArrayList<>(0);
 
         Set<Long> myResourceIds = myResources.stream().map(ResourceEntity::getId).collect(Collectors.toSet());
