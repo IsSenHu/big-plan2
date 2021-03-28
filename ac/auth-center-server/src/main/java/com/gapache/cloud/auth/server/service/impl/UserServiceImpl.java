@@ -335,7 +335,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         JsonResult<UserVO> result = userServerFeign.create(vo);
 
         if (result.requestSuccess()) {
-            // 设置角色
+            // 设置角色 只能给自己的下属设置
             if (vo.getRoleId() != null) {
                 SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
                 setUserRoleDTO.setUserId(result.getData().getId());

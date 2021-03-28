@@ -37,4 +37,9 @@ public class RoleCreateDTO implements Serializable {
      */
     @NotNull
     private Boolean admin;
+    /**
+     * 是否为组
+     * 默认false
+     */
+    private Boolean isGroup = false;
 }

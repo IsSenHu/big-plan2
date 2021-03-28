@@ -74,12 +74,25 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean create(RoleCreateDTO dto) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        RoleEntity creatorRole = roleRepository.findByUserId(accessCard.getUserId());
+        // 组管理员不允许再创建主角色了
+        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroup() != null && dto.getIsGroup(), SecurityError.ROLE_PERMISSION_DENY);
+        // 是一个角色组的成员，但不是管理员，禁止创建
+        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroup() != null && !creatorRole.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+
         RoleEntity entity = roleRepository.findByName(dto.getName());
         ThrowUtils.throwIfTrue(entity != null, SecurityError.ROLE_EXISTED);
 
         entity = new RoleEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
+        if (dto.getIsGroup()) {
+            // 如果不是组长创建的，就为组长
+            entity.setIsManager(creatorRole == null || creatorRole.getGroup() == null);
+            // 设置组
+            entity.setGroup(accessCard.getUserId());
+        }
         roleRepository.save(entity);
         Long roleId = entity.getId();
 
@@ -110,6 +123,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean update(RoleUpdateDTO dto) {
+
         Optional<RoleEntity> byId = roleRepository.findById(dto.getId());
         ThrowUtils.throwIfTrue(!byId.isPresent(), SecurityError.ROLE_NOT_FOUND);
         if (!StringUtils.equals(byId.get().getName(), dto.getName())) {
@@ -127,21 +141,43 @@ public class RoleServiceImpl implements RoleService {
         return true;
     }
 
+    private void checkRoleGroup(RoleEntity roleEntity) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
+        // 如果自己属于组的角色则必须是管理员才能操作
+        ThrowUtils.throwIfTrue(role != null && role.getGroup() != null && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+        // 只能操作自己组的角色
+        boolean groupLimit = role != null && role.getGroup() != null;
+        ThrowUtils.throwIfTrue(groupLimit && !role.getGroup().equals(roleEntity.getGroup()), SecurityError.ROLE_PERMISSION_DENY);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(Long id) {
-        roleRepository.deleteById(id);
-        rolePermissionRepository.deleteAllByRoleId(id);
-        RoleScopesEntity delete = new RoleScopesEntity();
-        delete.setRoleId(id);
-        simpleRedisRepository.delete(delete);
+        roleRepository.findById(id)
+                .ifPresent(member -> {
+                    checkRoleGroup(member);
+
+                    roleRepository.delete(member);
+                    rolePermissionRepository.deleteAllByRoleId(id);
+                    RoleScopesEntity delete = new RoleScopesEntity();
+                    delete.setRoleId(id);
+                    simpleRedisRepository.delete(delete);
+                });
         return true;
     }
 
     @Override
     public PageResult<RoleDTO> page(IPageRequest<RoleDTO> iPageRequest) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
+        // 主角色可以只能看到属于自己组的角色
+        boolean groupLimit = role != null && role.getGroup() != null;
+        // 组成员不具有这个权限
+        ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+
         PageRequest pageRequest = PageRequest.of(iPageRequest.getPage() - 1, iPageRequest.getNumber());
-        Page<RoleEntity> all = roleRepository.findAll(pageRequest);
+        Page<RoleEntity> all = groupLimit ? roleRepository.findAllByGroupAndIdNot(role.getGroup(), role.getId()) : roleRepository.findAll(pageRequest);
         return PageResult.of(all.getTotalElements(), x -> {
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(x, roleDTO);
@@ -152,21 +188,30 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RolePermissionDTO findRoleAndPermissions(Long id) {
         AccessCard accessCard = AccessCardHolder.getContext();
+        RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
+        // 主角色可以分配自己所有的权限给角色
+        // 这里进行组的限制，如果没有组限制的默认所有的权限
+        boolean groupLimit = role != null && role.getGroup() != null;
+        // 组成员不具有这个权限
+        ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
 
-        // TODO 主角色可以分配自己所有的权限给角色
         RolePermissionDTO rolePermissionDTO = new RolePermissionDTO();
         if (id != 0) {
             Optional<RoleEntity> optional = roleRepository.findById(id);
             ThrowUtils.throwIfTrue(!optional.isPresent(), SecurityError.ROLE_NOT_FOUND);
-
+            // 我要修改的角色是不是我所管理的
             RoleEntity roleEntity = optional.get();
+            ThrowUtils.throwIfTrue(groupLimit && (roleEntity.getId().equals(role.getId()) || !roleEntity.getGroup().equals(role.getGroup())), SecurityError.ROLE_PERMISSION_DENY);
+
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(roleEntity, roleDTO);
             rolePermissionDTO.setRole(roleDTO);
         }
 
         List<ElmUiTreeNode> elmUiTreeNodes = new ArrayList<>();
-        List<ResourceEntity> resources = resourceRepository.findAll();
+        List<ResourceEntity> resources = groupLimit ?
+                resourceRepository.findCustomizeAllResourceFromRid(role.getId()) : resourceRepository.findAll();
+
         // 可分配的所有权限
         List<PermissionEntity> permissions = permissionRepository.findAll();
         rolePermissionDTO.setDefaultExpandedKeys(new HashSet<>(resources.size()));
@@ -221,7 +266,17 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDTO> findAllByName(String name) {
-        List<RoleEntity> entities = StringUtils.isNotBlank(name) ? roleRepository.findAllByNameLike(FindUtils.allMatch(name)) : roleRepository.findAll();
+        AccessCard accessCard = AccessCardHolder.getContext();
+        RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
+        // 主角色可以只能看到属于自己组的角色
+        boolean groupLimit = role != null && role.getGroup() != null;
+        // 组成员不具有这个权限
+        ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+
+        List<RoleEntity> entities = groupLimit
+                ? StringUtils.isNotBlank(name) ? roleRepository.findAllByGroupAndIdNotAndNameLike(role.getGroup(), role.getId(), FindUtils.allMatch(name)) : roleRepository.findAllByGroupAndIdIsNot(role.getGroup(), role.getId())
+                : StringUtils.isNotBlank(name) ? roleRepository.findAllByNameLike(FindUtils.allMatch(name)) : roleRepository.findAll();
+
         return entities.stream().map(entity -> {
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(entity, roleDTO);
