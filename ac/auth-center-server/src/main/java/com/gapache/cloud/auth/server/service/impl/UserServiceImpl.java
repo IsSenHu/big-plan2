@@ -278,6 +278,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
             userInfoDTO.setIntroduction(jsonObject.getString("introduction"));
             // 设置角色
             List<ResourceEntity> allResource = resourceRepository.findAllResource(userEntity.getId());
+            // 如果是角色组权限的成员则不给用户页面和角色页面的权限
+
             if (CollectionUtils.isNotEmpty(allResource)) {
                 userInfoDTO.setRoles(allResource.stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
             } else {
@@ -335,7 +337,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         JsonResult<UserVO> result = userServerFeign.create(vo);
 
         if (result.requestSuccess()) {
-            // 设置角色 只能给自己的下属设置
+            // 设置角色 TODO 检查是否有设置该角色的权限
             if (vo.getRoleId() != null) {
                 SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
                 setUserRoleDTO.setUserId(result.getData().getId());
@@ -406,6 +408,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean setUserRole(SetUserRoleDTO dto) {
+        // TODO 检查是否有设置该角色的权限
+        // TODO 只能给自己的下属设定角色
+
         JsonResult<Boolean> result = userServerFeign.userIsExisted(dto.getUserId());
         if (!result.requestSuccess()) {
             return false;
