@@ -34,6 +34,9 @@ public class ResourceEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "only_admin_manager", nullable = false)
+    private Boolean onlyAdminManager;
+
     public String fullScopeName() {
         return this.resourceServerName + ":" + this.scope;
     }
