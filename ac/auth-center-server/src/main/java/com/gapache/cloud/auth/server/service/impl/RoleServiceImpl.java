@@ -131,6 +131,7 @@ public class RoleServiceImpl implements RoleService {
         }
 
         byId.ifPresent(roleEntity -> {
+            checkRoleGroup(roleEntity);
             roleEntity.setName(dto.getName());
             roleEntity.setDescription(dto.getDescription());
             roleRepository.save(roleEntity);
