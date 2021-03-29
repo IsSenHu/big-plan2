@@ -100,6 +100,8 @@ public class RoleServiceImpl implements RoleService {
             roleRepository.save(entity);
             entity.setGroupId(entity.getId());
             roleRepository.save(entity);
+        } else {
+            roleRepository.save(entity);
         }
 
         Long roleId = entity.getId();
