@@ -69,6 +69,9 @@ public class AuthResourceServerAutoConfiguration implements InitializingBean {
         stopWatch.start();
 
         Map<String, Object> enableAuthResourceServerMap = readyEvent.getApplicationContext().getBeansWithAnnotation(EnableAuthResourceServer.class);
+        if (!enableAuthResourceServerMap.values().iterator().hasNext()) {
+            return;
+        }
         Object firstFind = enableAuthResourceServerMap.values().iterator().next();
         EnableAuthResourceServer enableAuthResourceServer = AnnotationUtils.findAnnotation(firstFind.getClass(), EnableAuthResourceServer.class);
         Assert.notNull(enableAuthResourceServer, "not found @Annotation EnableAuthResourceServer");
