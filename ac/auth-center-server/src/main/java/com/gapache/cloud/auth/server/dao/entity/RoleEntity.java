@@ -28,8 +28,8 @@ public class RoleEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "group")
-    private Long group;
+    @Column(name = "group_id")
+    private Long groupId;
 
     @Column(name = "is_manager")
     private Boolean isManager;

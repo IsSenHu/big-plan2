@@ -70,4 +70,10 @@ public class RoleController {
         // TODO 管理属于自己组的角色
         return JsonResult.of(roleService.findAllByName(name));
     }
+
+    @GetMapping("/isGroup")
+    @AuthResource(scope = "isGroup", name = "是否为组成员")
+    public JsonResult<Boolean> isGroup() {
+        return JsonResult.of(roleService.isGroup());
+    }
 }

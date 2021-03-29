@@ -3,6 +3,7 @@ package com.gapache.cloud.auth.server.dao.repository.user;
 import com.gapache.cloud.auth.server.dao.entity.RoleEntity;
 import com.gapache.jpa.BaseJpaRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -17,12 +18,12 @@ public interface RoleRepository extends BaseJpaRepository<RoleEntity, Long> {
 
     List<RoleEntity> findAllByNameLike(String name);
 
-    List<RoleEntity> findAllByGroupAndIdNotAndNameLike(Long group, Long roleId, String name);
+    List<RoleEntity> findAllByGroupIdAndIdNotAndNameLike(Long groupId, Long roleId, String name);
 
     @Query("FROM RoleEntity R WHERE R.id = (SELECT UR.roleId FROM UserRoleEntity UR WHERE UR.userId = ?1)")
     RoleEntity findByUserId(Long userId);
 
-    Page<RoleEntity> findAllByGroupAndIdNot(Long group, Long roleId);
+    Page<RoleEntity> findAllByGroupIdAndIdNot(Long group, Long roleId, Pageable pageable);
 
-    List<RoleEntity> findAllByGroupAndIdIsNot(Long group, Long roleId);
+    List<RoleEntity> findAllByGroupIdAndIdIsNot(Long group, Long roleId);
 }

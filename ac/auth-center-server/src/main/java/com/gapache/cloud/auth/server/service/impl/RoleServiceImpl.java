@@ -77,9 +77,9 @@ public class RoleServiceImpl implements RoleService {
         AccessCard accessCard = AccessCardHolder.getContext();
         RoleEntity creatorRole = roleRepository.findByUserId(accessCard.getUserId());
         // 组管理员不允许再创建主角色了
-        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroup() != null && dto.getIsGroup(), SecurityError.ROLE_PERMISSION_DENY);
+        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroupId() != null && dto.getIsGroup(), SecurityError.ROLE_PERMISSION_DENY);
         // 是一个角色组的成员，但不是管理员，禁止创建
-        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroup() != null && !creatorRole.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+        ThrowUtils.throwIfTrue(creatorRole != null && creatorRole.getGroupId() != null && !creatorRole.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
 
         RoleEntity entity = roleRepository.findByName(dto.getName());
         ThrowUtils.throwIfTrue(entity != null, SecurityError.ROLE_EXISTED);
@@ -87,13 +87,21 @@ public class RoleServiceImpl implements RoleService {
         entity = new RoleEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
-        if (dto.getIsGroup()) {
+
+        // 组长创建的就为组员
+        boolean createGroupManager = dto.getIsGroup() && (creatorRole == null || creatorRole.getGroupId() == null);
+        if (creatorRole != null && creatorRole.getIsManager()) {
+            entity.setIsManager(false);
+            entity.setGroupId(creatorRole.getGroupId());
+            roleRepository.save(entity);
+        } else if (createGroupManager) {
             // 如果不是组长创建的，就为组长
-            entity.setIsManager(creatorRole == null || creatorRole.getGroup() == null);
-            // 设置组
-            entity.setGroup(accessCard.getUserId());
+            entity.setIsManager(true);
+            roleRepository.save(entity);
+            entity.setGroupId(entity.getId());
+            roleRepository.save(entity);
         }
-        roleRepository.save(entity);
+
         Long roleId = entity.getId();
 
         Set<Long> permissionList = dto.getPermissionList();
@@ -146,10 +154,10 @@ public class RoleServiceImpl implements RoleService {
         AccessCard accessCard = AccessCardHolder.getContext();
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
         // 如果自己属于组的角色则必须是管理员才能操作
-        ThrowUtils.throwIfTrue(role != null && role.getGroup() != null && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+        ThrowUtils.throwIfTrue(role != null && role.getGroupId() != null && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
         // 只能操作自己组的角色
-        boolean groupLimit = role != null && role.getGroup() != null;
-        ThrowUtils.throwIfTrue(groupLimit && !role.getGroup().equals(roleEntity.getGroup()), SecurityError.ROLE_PERMISSION_DENY);
+        boolean groupLimit = role != null && role.getGroupId() != null;
+        ThrowUtils.throwIfTrue(groupLimit && !role.getGroupId().equals(roleEntity.getGroupId()), SecurityError.ROLE_PERMISSION_DENY);
     }
 
     @Override
@@ -173,12 +181,12 @@ public class RoleServiceImpl implements RoleService {
         AccessCard accessCard = AccessCardHolder.getContext();
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
         // 主角色可以只能看到属于自己组的角色
-        boolean groupLimit = role != null && role.getGroup() != null;
+        boolean groupLimit = role != null && role.getGroupId() != null;
         // 组成员不具有这个权限
         ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
 
         PageRequest pageRequest = PageRequest.of(iPageRequest.getPage() - 1, iPageRequest.getNumber());
-        Page<RoleEntity> all = groupLimit ? roleRepository.findAllByGroupAndIdNot(role.getGroup(), role.getId()) : roleRepository.findAll(pageRequest);
+        Page<RoleEntity> all = groupLimit ? roleRepository.findAllByGroupIdAndIdNot(role.getGroupId(), role.getId(), pageRequest) : roleRepository.findAll(pageRequest);
         return PageResult.of(all.getTotalElements(), x -> {
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(x, roleDTO);
@@ -192,7 +200,7 @@ public class RoleServiceImpl implements RoleService {
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
         // 主角色可以分配自己所有的权限给角色
         // 这里进行组的限制，如果没有组限制的默认所有的权限
-        boolean groupLimit = role != null && role.getGroup() != null;
+        boolean groupLimit = role != null && role.getGroupId() != null;
         // 组成员不具有这个权限
         ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
 
@@ -202,7 +210,7 @@ public class RoleServiceImpl implements RoleService {
             ThrowUtils.throwIfTrue(!optional.isPresent(), SecurityError.ROLE_NOT_FOUND);
             // 我要修改的角色是不是我所管理的
             RoleEntity roleEntity = optional.get();
-            ThrowUtils.throwIfTrue(groupLimit && (roleEntity.getId().equals(role.getId()) || !roleEntity.getGroup().equals(role.getGroup())), SecurityError.ROLE_PERMISSION_DENY);
+            ThrowUtils.throwIfTrue(groupLimit && (roleEntity.getId().equals(role.getId()) || !roleEntity.getGroupId().equals(role.getGroupId())), SecurityError.ROLE_PERMISSION_DENY);
 
             RoleDTO roleDTO = new RoleDTO();
             BeanUtils.copyProperties(roleEntity, roleDTO);
@@ -212,6 +220,12 @@ public class RoleServiceImpl implements RoleService {
         List<ElmUiTreeNode> elmUiTreeNodes = new ArrayList<>();
         List<ResourceEntity> resources = groupLimit ?
                 resourceRepository.findCustomizeAllResourceFromRid(role.getId()) : resourceRepository.findAll();
+
+        if (groupLimit) {
+            resources.removeIf(resourceEntity -> StringUtils.startsWithIgnoreCase(resourceEntity.getScope(), "User")
+                    || StringUtils.startsWithIgnoreCase(resourceEntity.getScope(), "Role")
+                    || StringUtils.startsWithIgnoreCase(resourceEntity.getScope(), "Position"));
+        }
 
         // 可分配的所有权限
         List<PermissionEntity> permissions = permissionRepository.findAll();
@@ -270,12 +284,12 @@ public class RoleServiceImpl implements RoleService {
         AccessCard accessCard = AccessCardHolder.getContext();
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
         // 主角色可以只能看到属于自己组的角色
-        boolean groupLimit = role != null && role.getGroup() != null;
+        boolean groupLimit = role != null && role.getGroupId() != null;
         // 组成员不具有这个权限
         ThrowUtils.throwIfTrue(groupLimit && !role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
 
         List<RoleEntity> entities = groupLimit
-                ? StringUtils.isNotBlank(name) ? roleRepository.findAllByGroupAndIdNotAndNameLike(role.getGroup(), role.getId(), FindUtils.allMatch(name)) : roleRepository.findAllByGroupAndIdIsNot(role.getGroup(), role.getId())
+                ? StringUtils.isNotBlank(name) ? roleRepository.findAllByGroupIdAndIdNotAndNameLike(role.getGroupId(), role.getId(), FindUtils.allMatch(name)) : roleRepository.findAllByGroupIdAndIdIsNot(role.getGroupId(), role.getId())
                 : StringUtils.isNotBlank(name) ? roleRepository.findAllByNameLike(FindUtils.allMatch(name)) : roleRepository.findAll();
 
         return entities.stream().map(entity -> {
@@ -283,5 +297,16 @@ public class RoleServiceImpl implements RoleService {
             BeanUtils.copyProperties(entity, roleDTO);
             return roleDTO;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean isGroup() {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        if (accessCard.getUserId() == 0L) {
+            return false;
+        }
+
+        RoleEntity roleEntity = roleRepository.findByUserId(accessCard.getUserId());
+        return roleEntity != null && roleEntity.getGroupId() != null;
     }
 }

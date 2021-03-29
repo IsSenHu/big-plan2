@@ -279,7 +279,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
             // 设置角色
             List<ResourceEntity> allResource = resourceRepository.findAllResource(userEntity.getId());
             // 如果是角色组权限的成员则不给用户页面和角色页面的权限
-
+            roleRepository.findById(userRoleEntity.getRoleId())
+                    .ifPresent(role -> {
+                        if (role.getGroupId() != null && !role.getIsManager()) {
+                            allResource.removeIf(resourceEntity -> StringUtils.startsWithIgnoreCase(resourceEntity.getScope(), "User")
+                                    || StringUtils.startsWithIgnoreCase(resourceEntity.getScope(), "Role"));
+                        }
+                    });
             if (CollectionUtils.isNotEmpty(allResource)) {
                 userInfoDTO.setRoles(allResource.stream().map(ResourceEntity::fullScopeName).collect(Collectors.toList()));
             } else {
@@ -462,7 +468,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
 
         Map<Long, Long> userIdPositionIdMap = userPositionEntities
                 .stream()
-                .collect(Collectors.toMap(UserPositionEntity::getUserId, UserPositionEntity::getSuperiorId));
+                .collect(Collectors.toMap(UserPositionEntity::getUserId, UserPositionEntity::getPositionId));
 
         JsonResult<List<UserVO>> listUserResult = userServerFeign.findAllByIdIn(new ArrayList<>(userIdPositionIdMap.keySet()));
         if (!listUserResult.requestSuccess()) {

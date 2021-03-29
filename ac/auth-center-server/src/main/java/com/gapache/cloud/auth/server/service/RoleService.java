@@ -26,4 +26,6 @@ public interface RoleService {
     RolePermissionDTO findRoleAndPermissions(Long id);
 
     List<RoleDTO> findAllByName(String name);
+
+    Boolean isGroup();
 }
