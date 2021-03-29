@@ -26,4 +26,6 @@ public interface RoleRepository extends BaseJpaRepository<RoleEntity, Long> {
     Page<RoleEntity> findAllByGroupIdAndIdNot(Long group, Long roleId, Pageable pageable);
 
     List<RoleEntity> findAllByGroupIdAndIdIsNot(Long group, Long roleId);
+
+    boolean existsByIdAndGroupIdAndIsManager(Long id, Long groupId, Boolean isManager);
 }

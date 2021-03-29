@@ -57,4 +57,10 @@ public class UserController {
     public JsonResult<List<UserVO>> findAllByPositionIdBetween(@PathVariable Long lowPositionId) {
         return JsonResult.of(userService.findAllByPositionIdBetween(lowPositionId));
     }
+
+    @GetMapping("/findSuperior/{userId}")
+    @AuthResource(scope = "findSuperior", name = "查询上级是谁")
+    public JsonResult<UserVO> findSuperior(@PathVariable Long userId) {
+        return JsonResult.of(userService.findSuperior(userId));
+    }
 }

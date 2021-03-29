@@ -1,5 +1,6 @@
 package com.gapache.user.server.controller;
 
+import com.gapache.commons.model.AuthConstants;
 import com.gapache.commons.model.IPageRequest;
 import com.gapache.commons.model.JsonResult;
 import com.gapache.commons.model.PageResult;
@@ -51,7 +52,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @AuthResource(scope = "get", name = "根据ID查询用户")
-    public JsonResult<UserVO> get(@PathVariable Long id, @RequestParam(required = false) String clientId) {
+    public JsonResult<UserVO> get(@PathVariable Long id, @RequestParam(required = false, defaultValue = AuthConstants.VEA) String clientId) {
         return JsonResult.of(userService.get(id, clientId));
     }
 

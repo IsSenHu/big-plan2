@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gapache.cloud.auth.server.dao.entity.*;
 import com.gapache.cloud.auth.server.dao.repository.client.ClientRepository;
+import com.gapache.cloud.auth.server.dao.repository.company.CompanyRepository;
+import com.gapache.cloud.auth.server.dao.repository.position.PositionRepository;
 import com.gapache.cloud.auth.server.dao.repository.position.UserPositionRepository;
 import com.gapache.cloud.auth.server.dao.repository.resource.ResourceRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.RoleRepository;
@@ -112,6 +114,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
 
     @Resource
     private PositionService positionService;
+
+    @Resource
+    private PositionRepository positionRepository;
+
+    @Resource
+    private CompanyRepository companyRepository;
 
     private final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
@@ -414,10 +422,33 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean setUserRole(SetUserRoleDTO dto) {
-        // TODO 检查是否有设置该角色的权限
-        // TODO 只能给自己的下属设定角色
+        // 检查是否有设置该角色的权限
+        AccessCard accessCard = AccessCardHolder.getContext();
+        CustomerInfo customerInfo = accessCard.getCustomerInfo();
+        RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
+        if (role != null && role.getGroupId() != null) {
+            ThrowUtils.throwIfTrue(!role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
+            boolean existsByIdAndGroupIdAndIsManager = roleRepository.existsByIdAndGroupIdAndIsManager(dto.getRoleId(), role.getGroupId(), false);
+            ThrowUtils.throwIfTrue(!existsByIdAndGroupIdAndIsManager, SecurityError.ROLE_PERMISSION_DENY);
+        }
+        // 只能给自己的下属设定角色
+        Long userId = dto.getUserId();
+        Object positionId = customerInfo.get(AuthConstants.POSITION_ID);
+        // 判断是否属于有划分职级的系统
+        if (positionId != null) {
+            // 有则检查是否属于自己的下属
+            Long superiorId = (Long) customerInfo.get(AuthConstants.SUPERIOR_ID);
+            if (!superiorId.equals(accessCard.getUserId())) {
+                UserPositionEntity userPositionEntity = userPositionRepository.findByUserIdAndPositionId(userId, (Long) positionId);
+                if (userPositionEntity != null) {
+                    boolean checkSubordinate = checkSubordinate(accessCard.getUserId(), Lists.newArrayList(userPositionEntity));
+                    // 不是自己的下属禁止
+                    ThrowUtils.throwIfTrue(!checkSubordinate, SecurityError.ROLE_PERMISSION_DENY);
+                }
+            }
+        }
 
-        JsonResult<Boolean> result = userServerFeign.userIsExisted(dto.getUserId());
+        JsonResult<Boolean> result = userServerFeign.userIsExisted(userId);
         if (!result.requestSuccess()) {
             return false;
         }
@@ -429,11 +460,27 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         }
 
         UserRoleEntity entity = new UserRoleEntity();
-        entity.setUserId(dto.getUserId());
+        entity.setUserId(userId);
         entity.setRoleId(dto.getRoleId());
 
         userRoleRepository.save(entity);
         return true;
+    }
+
+    private boolean checkSubordinate(Long myUserId, List<UserPositionEntity> userPositionEntities) {
+        if (myUserId == 0L) {
+            return true;
+        }
+
+        for (UserPositionEntity userPositionEntity : userPositionEntities) {
+            if (userPositionEntity.getSuperiorId().equals(myUserId)) {
+                return true;
+            }
+            List<UserPositionEntity> superiorPositions = userPositionRepository.findAllByUserId(userPositionEntity.getSuperiorId());
+            return checkSubordinate(myUserId, superiorPositions);
+        }
+
+        return false;
     }
 
     @Override
@@ -480,5 +527,48 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
             user.setUsername(positionName.concat(":").concat(user.getUsername()));
         });
         return new ArrayList<>(listUserResult.getData());
+    }
+
+    @Override
+    public UserVO findSuperior(Long userId) {
+        AccessCard accessCard = AccessCardHolder.getContext();
+        CustomerInfo customerInfo = accessCard.getCustomerInfo();
+        if (!customerInfo.containsKey(AuthConstants.POSITION_ID)) {
+            return null;
+        }
+        Optional<PositionEntity> byId = positionRepository.findById((Long) customerInfo.get(AuthConstants.POSITION_ID));
+        if (!byId.isPresent()) {
+            return null;
+        }
+        Long companyId = byId.get().getCompanyId();
+        List<UserPositionEntity> userPositionEntityList = userPositionRepository.findAllByUserIdAndCompanyId(userId, companyId);
+        if (CollectionUtils.isEmpty(userPositionEntityList)) {
+            return null;
+        }
+        UserPositionEntity userPositionEntity = userPositionEntityList.get(0);
+        JsonResult<List<UserVO>> result = userServerFeign.findAllByIdIn(Lists.newArrayList(userPositionEntity.getSuperiorId()));
+
+        if (!result.requestSuccess()) {
+            return null;
+        }
+
+        Iterator<UserVO> iterator = result.getData().iterator();
+        if (!iterator.hasNext()) {
+            return null;
+        }
+
+        UserVO userVO = iterator.next();
+        companyRepository.findById(companyId)
+                .ifPresent(companyEntity -> {
+                    List<PositionEntity> superiorPositions = positionRepository.findAllByCompanyIdAndUserPosition(companyId, userPositionEntity.getSuperiorId());
+                    if (CollectionUtils.isNotEmpty(superiorPositions)) {
+                        userVO.setUsername(
+                                companyEntity.getName()
+                                .concat(":").concat(superiorPositions.get(0).getName())
+                                .concat(":").concat(userVO.getUsername())
+                        );
+                    }
+                });
+        return userVO;
     }
 }

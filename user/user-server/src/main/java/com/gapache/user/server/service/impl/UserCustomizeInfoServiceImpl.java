@@ -53,7 +53,12 @@ public class UserCustomizeInfoServiceImpl implements UserCustomizeInfoService {
             } else {
                 JSONObject newValues = JSON.parseObject(vo.getInfo());
                 JSONObject oldValues = JSON.parseObject(entity.getInfo());
-                newValues.forEach(oldValues::put);
+                newValues.forEach((key, value) -> {
+                    if (AuthConstants.filterCustomizeInfo(key)) {
+                        return;
+                    }
+                    oldValues.put(key, value);
+                });
                 entity.setInfo(oldValues.toJSONString());
 
                 // 发布事件

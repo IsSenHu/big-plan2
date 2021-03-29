@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
@@ -48,11 +47,6 @@ public class AuthCenterServer implements SmartLifecycle {
 
     public static void main(String[] args) {
         SpringApplication.run(AuthCenterServer.class, args);
-    }
-
-    @EventListener(MyEvent.class)
-    public void remoteEventListening(MyEvent myEvent) {
-        log.info(">>>>>> {}", myEvent);
     }
 
     @Override

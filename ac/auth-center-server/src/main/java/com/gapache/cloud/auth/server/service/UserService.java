@@ -40,4 +40,6 @@ public interface UserService extends UserDetailsService {
     List<UserVO> findAllByPositionId(Long positionId);
 
     List<UserVO> findAllByPositionIdBetween(Long lowPositionId);
+
+    UserVO findSuperior(Long userId);
 }

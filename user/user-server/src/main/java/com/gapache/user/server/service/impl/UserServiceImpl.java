@@ -7,10 +7,11 @@ import com.gapache.commons.model.ThrowUtils;
 import com.gapache.jpa.FindUtils;
 import com.gapache.jpa.PageHelper;
 import com.gapache.jpa.SpecificationFactory;
-import com.gapache.security.event.EventSender;
 import com.gapache.security.holder.AccessCardHolder;
 import com.gapache.security.model.AccessCard;
 import com.gapache.user.common.model.UserError;
+import com.gapache.user.common.model.vo.SaveUserRelationVO;
+import com.gapache.user.common.model.vo.UserCustomizeInfoVO;
 import com.gapache.user.common.model.vo.UserVO;
 import com.gapache.user.server.dao.entity.UserCustomizeInfoEntity;
 import com.gapache.user.server.dao.entity.UserEntity;
@@ -18,7 +19,7 @@ import com.gapache.user.server.dao.entity.UserRelationEntity;
 import com.gapache.user.server.dao.repository.UserCustomizeInfoRepository;
 import com.gapache.user.server.dao.repository.UserRelationRepository;
 import com.gapache.user.server.dao.repository.UserRepository;
-import com.gapache.user.common.model.vo.SaveUserRelationVO;
+import com.gapache.user.server.service.UserCustomizeInfoService;
 import com.gapache.user.server.service.UserService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,13 +40,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserCustomizeInfoRepository userCustomizeInfoRepository;
-    private final EventSender eventSender;
+    private final UserCustomizeInfoService userCustomizeInfoService;
     private final UserRelationRepository userRelationRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository, EventSender eventSender, UserRelationRepository userRelationRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserCustomizeInfoRepository userCustomizeInfoRepository, UserCustomizeInfoService userCustomizeInfoService, UserRelationRepository userRelationRepository) {
         this.userRepository = userRepository;
         this.userCustomizeInfoRepository = userCustomizeInfoRepository;
-        this.eventSender = eventSender;
+        this.userCustomizeInfoService = userCustomizeInfoService;
         this.userRelationRepository = userRelationRepository;
     }
 
@@ -113,11 +114,11 @@ public class UserServiceImpl implements UserService {
         ThrowUtils.throwIfTrue(!optional.isPresent(), UserError.USER_NOT_FOUND);
 
         optional.ifPresent(entity -> {
-            UserCustomizeInfoEntity userCustomizeInfoEntity = userCustomizeInfoRepository.findByUserIdAndClientId(entity.getId(), vo.getClient());
-            userCustomizeInfoEntity.setInfo(vo.getCustomizeInfo());
-            userCustomizeInfoRepository.save(userCustomizeInfoEntity);
-            // 发布事件
-            eventSender.send(vo.getId(), vo.getCustomizeInfo(), null);
+            UserCustomizeInfoVO userCustomizeInfoVO = new UserCustomizeInfoVO();
+            userCustomizeInfoVO.setUserId(vo.getId());
+            userCustomizeInfoVO.setClientId(vo.getClient());
+            userCustomizeInfoVO.setInfo(vo.getCustomizeInfo());
+            userCustomizeInfoService.update(userCustomizeInfoVO);
         });
 
         return true;
@@ -191,6 +192,12 @@ public class UserServiceImpl implements UserService {
                     addList.add(entity);
                 }
                 userRelationRepository.saveAll(addList);
+                break;
+            }
+            // 删除
+            case 1: {
+                userRelationRepository.deleteAllByOwnerIdInAndUserId(vo.getOwnerIdList(), vo.getUserId());
+                break;
             }
             default:
         }
