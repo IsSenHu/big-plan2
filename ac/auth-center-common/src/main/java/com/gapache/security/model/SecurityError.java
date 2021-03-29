@@ -32,7 +32,8 @@ public enum SecurityError implements Error {
     POSITION_NOT_FOUND(10521, "position not found"),
     COMPANY_NAME_EXISTED(10522, "company name is exited"),
     COMPANY_NOT_FOUND(10523, "company not found"),
-    ROLE_PERMISSION_DENY(10524, "role permission deny");
+    ROLE_PERMISSION_DENY(10524, "role permission deny"),
+    POSITION_PERMISSION_DENY(10525, "position permission deny");
 
     SecurityError(Integer code, String error) {
         this.code = code;

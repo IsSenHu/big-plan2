@@ -422,30 +422,28 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean setUserRole(SetUserRoleDTO dto) {
-        // 检查是否有设置该角色的权限
         AccessCard accessCard = AccessCardHolder.getContext();
         CustomerInfo customerInfo = accessCard.getCustomerInfo();
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
         if (role != null && role.getGroupId() != null) {
+            // 如果是属于角色组，必须是组管理员才能设置
             ThrowUtils.throwIfTrue(!role.getIsManager(), SecurityError.ROLE_PERMISSION_DENY);
             boolean existsByIdAndGroupIdAndIsManager = roleRepository.existsByIdAndGroupIdAndIsManager(dto.getRoleId(), role.getGroupId(), false);
+            // 角色是否存在 并且不为组长
             ThrowUtils.throwIfTrue(!existsByIdAndGroupIdAndIsManager, SecurityError.ROLE_PERMISSION_DENY);
         }
-        // 只能给自己的下属设定角色
+
         Long userId = dto.getUserId();
         Object positionId = customerInfo.get(AuthConstants.POSITION_ID);
-        // 判断是否属于有划分职级的系统
+        // 属于有职位的
         if (positionId != null) {
-            // 有则检查是否属于自己的下属
-            Long superiorId = (Long) customerInfo.get(AuthConstants.SUPERIOR_ID);
-            if (!superiorId.equals(accessCard.getUserId())) {
-                UserPositionEntity userPositionEntity = userPositionRepository.findByUserIdAndPositionId(userId, (Long) positionId);
-                if (userPositionEntity != null) {
-                    boolean checkSubordinate = checkSubordinate(accessCard.getUserId(), Lists.newArrayList(userPositionEntity));
-                    // 不是自己的下属禁止
-                    ThrowUtils.throwIfTrue(!checkSubordinate, SecurityError.ROLE_PERMISSION_DENY);
-                }
-            }
+            positionRepository.findById((Long) positionId)
+                    .ifPresent(positionEntity -> {
+                        List<UserPositionEntity> allByUserIdAndCompanyId = userPositionRepository.findAllByUserIdAndCompanyId(userId, positionEntity.getCompanyId());
+                        boolean checkSubordinate = checkSubordinate(accessCard.getUserId(), allByUserIdAndCompanyId);
+                        // 不是自己的下属禁止
+                        ThrowUtils.throwIfTrue(!checkSubordinate, SecurityError.POSITION_PERMISSION_DENY);
+                    });
         }
 
         JsonResult<Boolean> result = userServerFeign.userIsExisted(userId);
@@ -476,7 +474,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         }
 
         for (UserPositionEntity userPositionEntity : userPositionEntities) {
-            if (userPositionEntity.getSuperiorId().equals(myUserId)) {
+            if (myUserId.equals(userPositionEntity.getSuperiorId())) {
                 return true;
             }
             List<UserPositionEntity> superiorPositions = userPositionRepository.findAllByUserId(userPositionEntity.getSuperiorId());
