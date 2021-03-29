@@ -459,11 +459,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
             return false;
         }
 
-        UserRoleEntity entity = new UserRoleEntity();
-        entity.setUserId(userId);
-        entity.setRoleId(dto.getRoleId());
+        UserRoleEntity userRoleEntity = userRoleRepository.findByUserId(userId);
+        if (userRoleEntity == null) {
+            userRoleEntity = new UserRoleEntity();
+            userRoleEntity.setUserId(userId);
+        }
 
-        userRoleRepository.save(entity);
+        userRoleEntity.setRoleId(dto.getRoleId());
+        userRoleRepository.save(userRoleEntity);
         return true;
     }
 
