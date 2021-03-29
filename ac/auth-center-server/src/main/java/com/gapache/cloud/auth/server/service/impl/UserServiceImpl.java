@@ -356,7 +356,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
                 SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
                 setUserRoleDTO.setUserId(result.getData().getId());
                 setUserRoleDTO.setRoleId(vo.getRoleId());
-                setUserRole(setUserRoleDTO);
+                setUserRole(setUserRoleDTO, false);
             }
             // 绑定客户端
             if (!StringUtils.equals(vo.getClient(), AuthConstants.VEA)) {
@@ -421,7 +421,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean setUserRole(SetUserRoleDTO dto) {
+    public Boolean setUserRole(SetUserRoleDTO dto, boolean checkPosition) {
         AccessCard accessCard = AccessCardHolder.getContext();
         CustomerInfo customerInfo = accessCard.getCustomerInfo();
         RoleEntity role = roleRepository.findByUserId(accessCard.getUserId());
@@ -436,7 +436,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         Long userId = dto.getUserId();
         Object positionId = customerInfo.get(AuthConstants.POSITION_ID);
         // 属于有职位的
-        if (positionId != null) {
+        if (checkPosition && positionId != null) {
             positionRepository.findById((Long) positionId)
                     .ifPresent(positionEntity -> {
                         List<UserPositionEntity> allByUserIdAndCompanyId = userPositionRepository.findAllByUserIdAndCompanyId(userId, positionEntity.getCompanyId());

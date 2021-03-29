@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping("/setUserRole")
     @AuthResource(scope = "setUserRole", name = "设置用户角色")
     public JsonResult<Boolean> setUserRole(@RequestBody SetUserRoleDTO dto) {
-        return JsonResult.of(userService.setUserRole(dto));
+        return JsonResult.of(userService.setUserRole(dto, true));
     }
 
     @GetMapping("/findUserRoleId/{userId}")

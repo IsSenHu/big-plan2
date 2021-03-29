@@ -2,7 +2,6 @@ package com.gapache.cloud.auth.server.service;
 
 import com.gapache.cloud.auth.server.model.UserDetailsImpl;
 import com.gapache.security.model.SetUserRoleDTO;
-import com.gapache.security.model.UserDTO;
 import com.gapache.security.model.UserLoginDTO;
 import com.gapache.security.model.UserInfoDTO;
 import com.gapache.user.common.model.vo.UserVO;
@@ -31,7 +30,7 @@ public interface UserService extends UserDetailsService {
 
     Boolean logout(HttpServletRequest request);
 
-    Boolean setUserRole(SetUserRoleDTO dto);
+    Boolean setUserRole(SetUserRoleDTO dto, boolean checkPosition);
 
     Long findUserRoleId(Long userId);
 
