@@ -65,9 +65,6 @@ public class RoleController {
     @GetMapping("/findAllByName")
     @AuthResource(scope = "findAllByName", name = "根据名称查询角色")
     public JsonResult<List<RoleDTO>> findAllByName(@RequestParam String name) {
-        // TODO 主角色由超级管理员来分配
-        // TODO 给角色分组 组的标识为一个主角色
-        // TODO 管理属于自己组的角色
         return JsonResult.of(roleService.findAllByName(name));
     }
 

@@ -15,4 +15,6 @@ public interface UserCustomizeInfoRepository extends BaseJpaRepository<UserCusto
     UserCustomizeInfoEntity findByUserIdAndClientId(Long userId, String clientId);
 
     List<UserCustomizeInfoEntity> findAllByUserIdInAndClientId(Collection<Long> userIds, String clientId);
+
+    void deleteAllByUserId(Long userId);
 }

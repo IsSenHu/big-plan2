@@ -58,6 +58,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(vo.getUsername());
         userEntity.setPassword(vo.getPassword());
+        userEntity.setIsDelete(false);
 
         userRepository.save(userEntity);
 
@@ -78,12 +79,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean userIsExisted(Long id) {
-        return userRepository.existsById(id);
+        return userRepository.existsByIdAndIsDelete(id, false);
     }
 
     @Override
     public UserVO findByUsername(String username, String clientId) {
-        UserEntity userEntity = userRepository.findByUsername(username);
+        UserEntity userEntity = userRepository.findByUsernameAndIsDeleteIsNot(username, true);
         ThrowUtils.throwIfTrue(userEntity == null, UserError.USER_NOT_FOUND);
 
         UserVO vo = new UserVO();
@@ -103,7 +104,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean delete(Long id) {
-        userRepository.deleteById(id);
+        // 删除用户 这里做逻辑删除
+        userRepository.findById(id)
+                .ifPresent(userEntity -> {
+                    userEntity.setIsDelete(true);
+                    userRepository.save(userEntity);
+                });
         return true;
     }
 
@@ -143,6 +149,7 @@ public class UserServiceImpl implements UserService {
                     if (StringUtils.isNotBlank(params.getUsername())) {
                         predicates.add(criteriaBuilder.like(root.get("username").as(String.class), FindUtils.allMatch(params.getUsername())));
                     }
+                    predicates.add(criteriaBuilder.notEqual(root.get("delete").as(Boolean.class), true));
                 }
             }), pageable);
         }
@@ -206,7 +213,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserVO> findAllByIdIn(List<Long> userIds) {
-        return userRepository.findAllById(userIds)
+        return userRepository.findAllByIdInAndIsDeleteIsNot(userIds, false)
                 .stream()
                 .map(this::entity2Vo)
                 .collect(Collectors.toList());
@@ -234,6 +241,7 @@ public class UserServiceImpl implements UserService {
         vo.setLastModifiedTime(userEntity.getLastModifiedTime());
         vo.setCreateBy(userEntity.getCreateBy());
         vo.setLastModifiedBy(userEntity.getLastModifiedBy());
+        vo.setIsDelete(userEntity.getIsDelete());
         return vo;
     }
 }

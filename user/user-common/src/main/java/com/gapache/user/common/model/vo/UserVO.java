@@ -56,4 +56,6 @@ public class UserVO implements Serializable {
     private Long lastModifiedBy;
 
     private Long roleId;
+
+    private Boolean isDelete;
 }

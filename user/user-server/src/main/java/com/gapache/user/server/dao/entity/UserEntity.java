@@ -34,4 +34,10 @@ public class UserEntity extends OpFullRecordEntity<Long> {
      */
     @Column(name = "password", nullable = false, length = 1024)
     private String password;
+
+    /**
+     * 是否删除
+     */
+    @Column(name = "is_delete")
+    private Boolean isDelete;
 }

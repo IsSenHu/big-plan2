@@ -12,4 +12,6 @@ public interface UserRelationRepository extends JpaRepository<UserRelationEntity
     boolean existsByOwnerIdAndUserId(Long ownerId, Long userId);
 
     void deleteAllByOwnerIdInAndUserId(Iterable<Long> ownerIds, Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

@@ -36,6 +36,7 @@ import com.gapache.vertx.core.VertxCreatedEvent;
 import com.gapache.vertx.core.VertxManager;
 import com.gapache.vertx.redis.support.SimpleRedisRepository;
 import com.google.common.collect.Lists;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -341,7 +342,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @GlobalTransactional(name = "user:create", timeoutMills = 5000, rollbackFor = Exception.class)
     public Boolean create(UserVO vo) {
         AccessCard accessCard = AccessCardHolder.getContext();
         String clientId = accessCard.checkClientId();
@@ -351,7 +352,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
         JsonResult<UserVO> result = userServerFeign.create(vo);
 
         if (result.requestSuccess()) {
-            // 设置角色 TODO 检查是否有设置该角色的权限
+            // 设置角色
             if (vo.getRoleId() != null) {
                 SetUserRoleDTO setUserRoleDTO = new SetUserRoleDTO();
                 setUserRoleDTO.setUserId(result.getData().getId());
@@ -394,7 +395,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
                 }
             }
         }
-        return result.requestSuccess();
+        throw new RuntimeException();
     }
 
     private void deepSearchOwnerId(List<Long> ownerIdList, Long superiorId) {
@@ -494,6 +495,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
     public Boolean isEnabled(Long userId) {
         if (userId == 0) {
             return true;
+        }
+        JsonResult<Boolean> userIsExisted = userServerFeign.userIsExisted(userId);
+        if (userIsExisted.getData() == null || !userIsExisted.getData()) {
+            return false;
         }
         JsonResult<Object> value = userServerFeign.findValue(userId, AuthConstants.VEA, IS_ENABLED);
         return value.getData() != null ? (Boolean) value.getData() : true;
