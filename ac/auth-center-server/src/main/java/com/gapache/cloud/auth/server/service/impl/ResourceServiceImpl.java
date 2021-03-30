@@ -9,11 +9,14 @@ import com.gapache.cloud.auth.server.dao.repository.client.ClientRepository;
 import com.gapache.cloud.auth.server.dao.repository.user.PermissionRepository;
 import com.gapache.cloud.auth.server.dao.repository.resource.ResourceRepository;
 import com.gapache.cloud.auth.server.dao.repository.resource.ResourceServerRepository;
+import com.gapache.cloud.auth.server.service.ResourceService;
 import com.gapache.security.interfaces.ResourceReceiver;
 import com.gapache.security.model.AuthResourceDTO;
+import com.gapache.security.model.ResourceDTO;
 import com.gapache.security.model.ResourceReportDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class ResourceServiceImpl implements ResourceReceiver {
+public class ResourceServiceImpl implements ResourceReceiver, ResourceService {
 
     private final ResourceRepository resourceRepository;
 
@@ -126,5 +129,17 @@ public class ResourceServiceImpl implements ResourceReceiver {
         updateScopes.addAll(addScopes);
         clientRepository.save(client);
         return true;
+    }
+
+    @Override
+    public List<ResourceDTO> findAll() {
+        return resourceRepository.findAll()
+                .stream()
+                .map(resourceEntity -> {
+                    ResourceDTO dto = new ResourceDTO();
+                    BeanUtils.copyProperties(resourceEntity, dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,10 +57,11 @@ public class ClientServiceImpl implements ClientService {
         BeanUtils.copyProperties(clientEntity, clientDetails);
         clientDetails.setId(clientEntity.getId());
 
+        // 空字符串标识所有 null表示没有
         String authCenterClientId = DynamicPropertyUtils.getString("auth.center.client-id");
-        if (StringUtils.equals(authCenterClientId, clientId)) {
+        if (StringUtils.equals(authCenterClientId, clientId) || "".equals(clientEntity.getScopes())) {
             List<ResourceEntity> allResource = resourceRepository.findAll();
-            clientDetails.setScopes(allResource.stream().map(r -> r.getResourceServerName() + ":" + r.getScope()).collect(Collectors.joining(",")));
+            clientDetails.setScopes(allResource.stream().map(ResourceEntity::fullScopeName).collect(Collectors.joining(",")));
         }
         return clientDetails;
     }
@@ -72,11 +74,42 @@ public class ClientServiceImpl implements ClientService {
 
         ClientEntity entity = new ClientEntity();
         BeanUtils.copyProperties(clientDTO, entity, "secret");
+        boolean all = Arrays.stream(clientDTO.getScopes().split(",")).anyMatch(scope -> StringUtils.equals(scope, "全部"));
+        if (all) {
+            entity.setScopes("");
+        } else if (StringUtils.isBlank(clientDTO.getScopes())) {
+            entity.setScopes(null);
+        }
         entity.setSecret(passwordEncoder.encode(clientDTO.getSecret()));
         if (StringUtils.isNotBlank(clientDTO.getPrivateKey())) {
             stringRedisTemplate.opsForValue().set("CLIENT_PRIVATE_KEY:" + clientDTO.getClientId(), clientDTO.getPrivateKey());
         }
         return clientRepository.save(entity).getId() != null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean update(ClientDTO clientDTO) {
+        ClientEntity clientEntity = clientRepository.findByClientId(clientDTO.getClientId());
+        ThrowUtils.throwIfTrue(clientEntity == null, SecurityError.CLIENT_NOT_FOUND);
+
+        clientEntity.setTimeout(clientDTO.getTimeout());
+        clientEntity.setRefreshTokenTimeout(clientDTO.getRefreshTokenTimeout());
+        clientEntity.setAutoGrant(clientDTO.getAutoGrant());
+        boolean all = Arrays.stream(clientDTO.getScopes().split(",")).anyMatch(scope -> StringUtils.equals(scope, "全部"));
+        if (all) {
+            clientEntity.setScopes("");
+        } else if (StringUtils.isBlank(clientDTO.getScopes())) {
+            clientEntity.setScopes(null);
+        } else {
+            clientEntity.setScopes(clientDTO.getScopes());
+        }
+        clientEntity.setGrantTypes(clientDTO.getGrantTypes());
+        clientEntity.setPrivateKey(clientDTO.getPrivateKey());
+        clientEntity.setRedirectUrl(clientDTO.getRedirectUrl());
+
+        clientRepository.save(clientEntity);
+        return true;
     }
 
     @Override

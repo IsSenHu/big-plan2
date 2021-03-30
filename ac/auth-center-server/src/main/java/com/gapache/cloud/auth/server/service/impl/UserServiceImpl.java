@@ -376,11 +376,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
                 if (customerInfo.containsKey(AuthConstants.POSITION_ID) || customerInfo.containsKey(AuthConstants.SUPERIOR_ID)) {
                     Long positionId = customerInfo.getLong(AuthConstants.POSITION_ID);
                     Long superiorId = customerInfo.getLong(AuthConstants.SUPERIOR_ID);
-                    UserPositionEntity userPositionEntity = new UserPositionEntity();
-                    userPositionEntity.setUserId(result.getData().getId());
-                    userPositionEntity.setPositionId(positionId);
-                    userPositionEntity.setSuperiorId(superiorId);
-                    userPositionRepository.save(userPositionEntity);
+                    if (positionId != null) {
+                        UserPositionEntity userPositionEntity = new UserPositionEntity();
+                        userPositionEntity.setUserId(result.getData().getId());
+                        userPositionEntity.setPositionId(positionId);
+                        userPositionEntity.setSuperiorId(superiorId);
+                        userPositionRepository.save(userPositionEntity);
+                    }
+
                     // 如果上级Id不为空，则更新所属用户
                     if (superiorId != null) {
                         List<Long> ownerIdList = new ArrayList<>();
@@ -395,7 +398,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<VertxCr
                 }
             }
         }
-        throw new RuntimeException();
+        return true;
     }
 
     private void deepSearchOwnerId(List<Long> ownerIdList, Long superiorId) {

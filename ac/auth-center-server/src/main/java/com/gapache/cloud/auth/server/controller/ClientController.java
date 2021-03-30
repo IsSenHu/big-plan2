@@ -35,6 +35,12 @@ public class ClientController {
         return JsonResult.of(clientService.create(clientDTO));
     }
 
+    @PutMapping
+    @AuthResource(scope = "update", name = "更新客户端")
+    public JsonResult<Boolean> update(@RequestBody ClientDTO clientDTO) {
+        return JsonResult.of(clientService.update(clientDTO));
+    }
+
     @PostMapping("/bindUser")
     @AuthResource(scope = "bindUser", name = "绑定用户到客户端")
     public JsonResult<Boolean> bindUser(@RequestBody UserClientRelationDTO userClientRelationDTO) {

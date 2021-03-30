@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
                     if (StringUtils.isNotBlank(params.getUsername())) {
                         predicates.add(criteriaBuilder.like(root.get("username").as(String.class), FindUtils.allMatch(params.getUsername())));
                     }
-                    predicates.add(criteriaBuilder.notEqual(root.get("delete").as(Boolean.class), true));
+                    predicates.add(criteriaBuilder.notEqual(root.get("isDelete").as(Boolean.class), true));
                 }
             }), pageable);
         }

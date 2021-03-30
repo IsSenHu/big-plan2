@@ -15,6 +15,8 @@ public interface ClientService {
 
     Boolean create(ClientDTO clientDTO);
 
+    Boolean update(ClientDTO clientDTO);
+
     ClientDetailsImpl findById(Long id);
 
     ClientDTO findDtoByClientId(String clientId);
